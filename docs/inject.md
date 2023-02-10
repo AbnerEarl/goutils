@@ -1,6 +1,6 @@
 # inject
 --
-    import "github.com/YouAreOnlyOne/goutils"
+    import "github.com/YouAreOnlyOne/goutils/inject"
 
 Package inject provides utilities for mapping and injecting dependencies in
 various ways.
