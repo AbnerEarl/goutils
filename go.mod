@@ -1,4 +1,4 @@
-module goutils
+module github.com/YouAreOnlyOne/goutils
 
 go 1.16
 
