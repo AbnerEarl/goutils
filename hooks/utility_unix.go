@@ -1,7 +1,7 @@
 //go:build !windows
 // +build !windows
 
-package hook
+package hooks
 
 import (
 	"syscall"

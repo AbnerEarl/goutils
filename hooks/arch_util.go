@@ -1,4 +1,4 @@
-package hook
+package hooks
 
 import (
 	"bytes"
@@ -755,9 +755,9 @@ func genJumpCode(mode int, rdxIndirect bool, to, from uintptr) []byte {
 
 		// by convention, rdx is the context register pointed to a funcval.
 		// funcval of a closure function contains extra information used by compiler and runtime.
-		// so using indirect jmp by rdx makes it possible to hook closure func and func created by reflect.MakeFunc
+		// so using indirect jmp by rdx makes it possible to hooks closure func and func created by reflect.MakeFunc
 
-		// caution: 'to' funcval must stay alive after hook is installed.
+		// caution: 'to' funcval must stay alive after hooks is installed.
 		if mode == 32 {
 			code = []byte{
 				0xBA,

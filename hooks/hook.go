@@ -1,4 +1,4 @@
-package hook
+package hooks
 
 import (
 	"bytes"
@@ -46,7 +46,7 @@ func getDataPtrFromValue(v reflect.Value) uintptr {
 func ShowDebugInfo() string {
 	buff := bytes.NewBuffer(make([]byte, 0, 256))
 	for k, v := range g_all {
-		s := fmt.Sprintf("hook function at addr:%x, how:%s, num of instruction fixed:%d\n", k, v.Info.How, len(v.Info.Fix))
+		s := fmt.Sprintf("hooks function at addr:%x, how:%s, num of instruction fixed:%d\n", k, v.Info.How, len(v.Info.Fix))
 
 		buff.WriteString(s)
 		for _, f := range v.Info.Fix {
