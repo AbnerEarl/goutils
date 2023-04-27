@@ -1,6 +1,8 @@
 package strs
 
 import (
+	"encoding/json"
+	"fmt"
 	"net"
 	"reflect"
 	"regexp"
@@ -129,4 +131,35 @@ func CheckMobile(phone string) bool {
 
 	// 返回 MatchString 是否匹配
 	return reg.MatchString(phone)
+}
+
+func IsEmpty(data interface{}) bool {
+	if data == nil || data == "" {
+		return true
+	}
+	if reflect.TypeOf(data).Kind() == reflect.String && len(fmt.Sprint(data)) < 1 {
+		return true
+	} else if reflect.TypeOf(data).Kind() == reflect.Slice {
+		arr := data.([]interface{})
+		if len(arr) < 1 {
+			return true
+		}
+	} else if reflect.TypeOf(data).Kind() == reflect.Struct {
+		ins1 := reflect.New(reflect.TypeOf(data)).Interface()
+		bytes, _ := json.Marshal(data)
+		json.Unmarshal(bytes, &ins1)
+		ins2 := reflect.New(reflect.TypeOf(data)).Interface()
+		return reflect.DeepEqual(ins1, ins2)
+	} else if reflect.TypeOf(data).Kind() == reflect.Map {
+		bytes, err := json.Marshal(data)
+		if err != nil {
+			return true
+		}
+		dataMap := map[string]interface{}{}
+		json.Unmarshal(bytes, &dataMap)
+		if len(dataMap) == 0 {
+			return true
+		}
+	}
+	return false
 }

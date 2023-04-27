@@ -1,9 +1,11 @@
-package redis
+package redisc
 
 import (
 	"context"
 	"github.com/go-redis/redis"
 	"time"
+
+	"github.com/go-redis/redis/v8"
 )
 
 var RedisCli *redis.Client
