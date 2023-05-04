@@ -2,7 +2,6 @@ package redisc
 
 import (
 	"context"
-	"github.com/go-redis/redis"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -10,14 +9,20 @@ import (
 
 var RedisCli *redis.Client
 
-const CtxExpireTime = 5 * time.Second
+var CtxExpireTime = 5 * time.Second
 
-func InitRedis(addr, password string, db int) error {
+func InitRedis(addr, password string, db, poolSize int) error {
+	if db < 1 {
+		db = 1
+	}
+	if poolSize < 1 {
+		poolSize = 100
+	}
 	RedisCli = redis.NewClient(&redis.Options{
 		Addr:     addr,     //"localhost:6379"
 		Password: password, // no password set
 		DB:       db,       // use default DB
-		PoolSize: 100,      // 连接池大小
+		PoolSize: poolSize, // 连接池大小
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
