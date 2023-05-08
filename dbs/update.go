@@ -23,6 +23,7 @@ func (c *UpdateModel) TableName() string {
 }
 
 func InitDefaultData(basePath string) {
+	DB.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate(&UpdateModel{})
 	fileList := files.GetPathBySuffix(basePath, ".sql")
 	recordList := make([]*UpdateModel, 0)
 	err := DB.Find(&recordList).Error

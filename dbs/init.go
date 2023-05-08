@@ -50,10 +50,8 @@ func OpenDB(username, password, ip string, port uint64, dbName, dbType string, d
 }
 
 func Migration(models []interface{}) {
-	//自动迁移模式
-	DB.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate(&UpdateModel{})
 	for _, md := range models {
-		DB.Set("gorm:table_options", "ENGINE=Distributed(cluster, default, hits)").AutoMigrate(md)
+		DB.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate(md)
 	}
 }
 
