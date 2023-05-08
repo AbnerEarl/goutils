@@ -1,19 +1,17 @@
 package gins
 
 import (
+	"github.com/YouAreOnlyOne/goutils/times"
 	"os"
 	"path/filepath"
 	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-const (
-	LogTmFmtWithMS = "2006-01-02 15:04:05.000"
-)
-
-func initLog(logDir, logfileName string) {
+func InitLog(logDir, logfileName string) {
 	l := &Log{
 		LogDir:      logDir,
 		LogFileName: logfileName,
@@ -60,7 +58,7 @@ func InitLogger(l *Log) zapcore.Core {
 
 	// 自定义时间输出格式
 	customTimeEncoder := func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-		enc.AppendString("[" + t.Format(LogTmFmtWithMS) + "]")
+		enc.AppendString("[" + t.Format(times.TmFmtWithMS1) + "]")
 	}
 	// 自定义日志级别显示
 	customLevelEncoder := func(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {

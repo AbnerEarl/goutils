@@ -1,4 +1,4 @@
-package strs
+package utils
 
 type floatInfo struct {
 	mantbits uint

@@ -1,4 +1,4 @@
-package strs
+package utils
 
 import (
 	"encoding/json"

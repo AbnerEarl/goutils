@@ -1,6 +1,6 @@
 module github.com/YouAreOnlyOne/goutils
 
-go 1.16
+go 1.18
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -15,4 +15,8 @@ require (
 	go.uber.org/zap v1.21.0
 	golang.org/x/arch v0.2.0
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
+	gorm.io/driver/mysql v1.5.0
+	gorm.io/driver/postgres v1.5.0
+	gorm.io/gorm v1.25.0
 )
