@@ -14,8 +14,8 @@ import (
 
 type UpdateModel struct {
 	BaseModel
-	FileName    string    `json:"file_name" gorm:"column:file_name;not null"`
-	ExecuteTime time.Time `json:"execute_time" gorm:"column:execute_time;null"`
+	FileName    string    `json:"file_name" gorm:"column:file_name;not null;comment:'文件名称'"`
+	ExecuteTime time.Time `json:"execute_time" gorm:"column:execute_time;null;comment:'执行时间'"`
 }
 
 func (c *UpdateModel) TableName() string {

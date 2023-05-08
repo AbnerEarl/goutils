@@ -1,6 +1,7 @@
 package gins
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -9,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var WhitelistAPI = map[string]bool{
@@ -67,17 +69,17 @@ func Args(checkParamMethods ...func(c *gin.Context) (bool, error)) gin.HandlerFu
 				requestParams[k] = names
 			}
 		}
-		bytes, err := ioutil.ReadAll(c.Request.Body)
-		if err == nil && bytes != nil {
+		bys, err := ioutil.ReadAll(c.Request.Body)
+		if err == nil && bys != nil {
 			maps := make(map[string]interface{})
-			err = json.Unmarshal(bytes, &maps)
+			err = json.Unmarshal(bys, &maps)
 			if err == nil {
 				for k, v := range maps {
 					c.Set(k, v)
 					requestParams[k] = v
 				}
 			} else {
-				params := strings.Split(string(bytes), "&")
+				params := strings.Split(string(bys), "&")
 				for _, param := range params {
 					if strings.Contains(param, "=") {
 						arr := strings.Split(param, "=")
@@ -209,6 +211,123 @@ func jwtVerify(c *gin.Context, checkToken func(token, apiPath string, c *gin.Con
 	if err != nil {
 		return err
 	}
-	c.Header("token", token)
+	if len(token) > 0 {
+		c.Header("token", token)
+	}
 	return nil
+}
+
+func LogAop(dealLogInfo func(data LogData)) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		startTime := time.Now()
+		blw := &BodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
+		c.Writer = blw
+		c.Next()
+		endTime := time.Now()
+
+		var logInfo = make(map[string]interface{})
+		logInfo["method"] = c.Request.Method
+		logInfo["execute_time"] = time.Now()
+		logInfo["content_length"] = c.Request.ContentLength
+		logInfo["content_type"] = c.ContentType()
+		logInfo["cost_time"] = endTime.Sub(startTime).Milliseconds()
+		logInfo["request_url"] = c.Request.RequestURI
+		logInfo["status_code"] = c.Writer.Status()
+		logInfo["request_host"] = c.Request.Host
+		logInfo["user_agent"] = c.Request.UserAgent()
+		ip := c.Request.Header.Get("X-Real-IP")
+		logInfo["remote_ip"] = ip
+		logInfo["remote_addr"] = c.Request.RemoteAddr
+		apiPath := strings.Split(c.FullPath(), "/:")[0]
+		logInfo["api_path"] = apiPath
+		logInfo["referer"] = c.Request.Referer()
+		respData := blw.body.String()
+		logInfo["response_data"] = respData
+		requestParams, _ := c.Get("request_params")
+		params, _ := json.Marshal(requestParams)
+		logInfo["request_params"] = string(params)
+		reqToken := c.GetHeader("token")
+		logInfo["request_token"] = reqToken
+
+		logData := LogData{
+			LogInfo:       logInfo,
+			RequestParams: requestParams.(map[string]interface{}),
+			RequestToken:  reqToken,
+			ResponseData:  respData,
+		}
+		dealLogInfo(logData)
+	}
+}
+
+type BodyLogWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+
+func (w BodyLogWriter) Write(b []byte) (int, error) {
+	w.body.Write(b)
+	return w.ResponseWriter.Write(b)
+}
+
+func GetString(s interface{}) string {
+	if s != nil {
+		return fmt.Sprint(s)
+	} else {
+		return ""
+	}
+}
+
+func GetStatus(s interface{}) string {
+	result, e := strconv.Atoi(fmt.Sprint(s))
+	if e == nil {
+		if result == 0 {
+			return "停用"
+		} else {
+			return "启用"
+		}
+	}
+	return "未知"
+}
+
+func GetAnyString(desc string, keys ...interface{}) string {
+	var result []string
+	for _, key := range keys {
+		if key != nil {
+			result = append(result, fmt.Sprint(key))
+		}
+	}
+	if len(result) > 0 {
+		return fmt.Sprintf("，%s%s", desc, strings.Join(result, "、"))
+	} else {
+		return ""
+	}
+}
+
+func GetKeyword(keys ...interface{}) string {
+	var result []string
+	for _, key := range keys {
+		if key != nil {
+			result = append(result, fmt.Sprint(key))
+		}
+	}
+	if len(result) > 0 {
+		return fmt.Sprintf("，关键词为：%s", strings.Join(result, "、"))
+	} else {
+		return ""
+	}
+}
+
+func GetJoinString(ss ...interface{}) string {
+	var result []string
+	for _, s := range ss {
+		if s != nil {
+			result = append(result, fmt.Sprint(s))
+		}
+
+	}
+	if len(result) > 0 {
+		return strings.Join(result, "、")
+	} else {
+		return "空"
+	}
 }

@@ -849,6 +849,14 @@ func (c *Context) ArgsBoolDefault(key string, val bool) bool {
 	panic(err)
 }
 
+func (c *Context) SaveFile(key, savePath string) error {
+	f, err := c.FormFile(key)
+	if err != nil {
+		return err
+	}
+	return c.SaveUploadedFile(f, savePath)
+}
+
 func (s *Server) Group(relativePath string, handlers ...func(c *Context)) *RouterGroup {
 	//Group 重写路由组注册
 	sHandlers := make([]gin.HandlerFunc, 0)

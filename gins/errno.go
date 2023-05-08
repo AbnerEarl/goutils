@@ -29,8 +29,9 @@ type ThirdResponse struct {
 
 type LogData struct {
 	LogInfo       map[string]interface{} `json:"log_info"`
-	RequestParams interface{}            `json:"request_params"`
-	AccountInfo   interface{}            `json:"account_info"`
+	RequestParams map[string]interface{} `json:"request_params"`
+	RequestToken  string                 `json:"request_token"`
+	ResponseData  string                 `json:"response_data"`
 }
 
 type Errno struct {
