@@ -15,11 +15,11 @@ var (
 )
 
 type BaseModel struct {
-	Id        uint64     `json:"id" gorm:"primary_key;AUTO_INCREMENT;column:id"`
-	IsDel     uint64     `json:"-" gorm:"column:is_del;default:0"`
-	CreatedAt time.Time  `json:"created_at" gorm:"column:created_at"`
-	UpdatedAt time.Time  `json:"updated_at" gorm:"column:updated_at"`
-	DeletedAt *time.Time `json:"-" gorm:"column:deleted_at" sql:"index"`
+	Id        uint64     `json:"id" gorm:"primary_key;AUTO_INCREMENT;column:id;comment:'主键ID'"`
+	IsDel     uint64     `json:"-" gorm:"column:is_del;default:0;comment:'删除标志'"`
+	CreatedAt time.Time  `json:"created_at" gorm:"column:created_at;comment:'创建时间'"`
+	UpdatedAt time.Time  `json:"updated_at" gorm:"column:updated_at;comment:'更新时间'"`
+	DeletedAt *time.Time `json:"-" gorm:"column:deleted_at;comment:'删除时间'" sql:"index"`
 	Remark    string     `json:"remark" gorm:"column:remark;null;type:text;comment:'备注信息'"`
 }
 
