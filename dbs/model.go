@@ -27,7 +27,7 @@ func (c *BaseModel) TableName() string {
 	return "base_info"
 }
 
-func Create(dataModel []interface{}) error {
+func Create(dataModel interface{}) error {
 	//tableName := ""
 	//ref := reflect.ValueOf(dataModel)
 	//method := ref.MethodByName("TableName")
@@ -41,8 +41,8 @@ func Create(dataModel []interface{}) error {
 	return DB.Create(dataModel).Error
 }
 
-func CreateBatch(dataModels []interface{}, batchSize uint) error {
-	return DB.CreateInBatches(&dataModels, int(batchSize)).Error
+func CreateBatch(dataModels interface{}, batchSize uint) error {
+	return DB.CreateInBatches(dataModels, int(batchSize)).Error
 }
 
 func UpdateById(dataModel interface{}) error {
