@@ -3,6 +3,7 @@ package mongoc
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/bsonx"
@@ -130,7 +131,7 @@ func FindOne(coll string, filter, result interface{}) error {
 	return err
 }
 
-func FinMany(pageSize, pageNo int64, coll string, filter, sort, result, projects interface{}) error {
+func FindMany(pageSize, pageNo int64, coll string, filter, sort, result, projects interface{}) error {
 	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
 	defer cancel()
 	if pageSize == 0 {
@@ -155,7 +156,7 @@ func FinMany(pageSize, pageNo int64, coll string, filter, sort, result, projects
 	return err
 }
 
-func FinManyCount(pageSize, pageNo int64, coll string, filter, sort, result, projects interface{}) (int64, error) {
+func FindManyCount(pageSize, pageNo int64, coll string, filter, sort, result, projects interface{}) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
 	defer cancel()
 	if pageSize == 0 {
@@ -173,6 +174,52 @@ func FinManyCount(pageSize, pageNo int64, coll string, filter, sort, result, pro
 	ops.SetSkip(offset)
 	ops.SetProjection(projects)
 	cur, err := MongoCli.Database(DbName).Collection(coll).Find(ctx, filter, ops)
+	if err != nil {
+		return 0, err
+	}
+	err = cur.All(ctx, result)
+	if err != nil {
+		return 0, err
+	}
+	count, err := CountDocuments(coll, filter)
+	return count, err
+}
+
+func FindManyRange(pageSize, lastId int64, coll string, filter, sort, result, projects interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
+	defer cancel()
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	ops := options.Find()
+	ops.SetSort(sort)
+	ops.SetLimit(pageSize)
+	ops.SetProjection(projects)
+	page := bson.M{"_id": bson.M{"$gt": lastId}}
+	cur, err := MongoCli.Database(DbName).Collection(coll).Find(ctx, bson.A{page, filter}, ops)
+	if err != nil {
+		return err
+	}
+	err = cur.All(ctx, result)
+	return err
+}
+
+func FindManyRangeCount(pageSize, lastId int64, coll string, filter, sort, result, projects interface{}) (int64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
+	defer cancel()
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	ops := options.Find()
+	ops.SetSort(sort)
+	ops.SetLimit(pageSize)
+	ops.SetProjection(projects)
+	page := bson.M{"_id": bson.M{"$gt": lastId}}
+	cur, err := MongoCli.Database(DbName).Collection(coll).Find(ctx, bson.A{page, filter}, ops)
 	if err != nil {
 		return 0, err
 	}
@@ -226,16 +273,16 @@ func Transaction(fn func(mongo.SessionContext) error) error {
 	return err
 }
 
+func TransactionWithOptions(opts *options.SessionOptions, fn func(mongo.SessionContext) error) error {
+	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
+	defer cancel()
+	err := MongoCli.UseSessionWithOptions(ctx, opts, fn)
+	return err
+}
+
 func Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
 	defer cancel()
 	err := MongoCli.Disconnect(ctx)
 	return err
-}
-
-type BaseModel struct {
-	CreatedAt time.Time  `json:"created_at" bson:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at" bson:"updated_at"`
-	DeletedAt *time.Time `json:"-" bson:"deleted_at"`
-	Remark    string     `json:"remark" bson:"remark"`
 }
