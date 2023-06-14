@@ -46,7 +46,8 @@ func LinuxMachineMustID() string {
 	if err == nil {
 		result += "###" + systemSerial
 	}
-	err, netMac := ShellScript("ip a | grep -A 1  \"$(ls /sys/class/net/ | grep -v \"`ls /sys/devices/virtual/net/`\")\" | grep ether | awk '{print $2}' | tr '\\n' ', ' | sed 's/,$//'")
+	//err, netMac := ShellScript("ip a | grep -A 1  \"$(ls /sys/class/net/ | grep -v \"`ls /sys/devices/virtual/net/`\")\" | grep ether | awk '{print $2}' | tr '\\n' ',' | sed 's/,$//'")
+	err, netMac := ShellScript("dmesg | grep eth | grep Express | awk '{print $NF}' | tr '\\n' ',' | sed 's/,$//'")
 	if err == nil {
 		result += "###" + netMac
 	}
