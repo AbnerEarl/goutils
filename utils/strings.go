@@ -140,7 +140,9 @@ func IsEmpty(data interface{}) bool {
 	if reflect.TypeOf(data).Kind() == reflect.String && len(fmt.Sprint(data)) < 1 {
 		return true
 	} else if reflect.TypeOf(data).Kind() == reflect.Slice {
-		arr := data.([]interface{})
+		bys, _ := json.Marshal(data)
+		var arr []interface{}
+		json.Unmarshal(bys, &arr)
 		if len(arr) < 1 {
 			return true
 		}

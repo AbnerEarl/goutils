@@ -49,12 +49,38 @@ func UpdateById(dataModel interface{}) error {
 	return DB.Save(dataModel).Error
 }
 
-func UpdateByWhere(where string, updates map[string]interface{}, dataModel interface{}) error {
+func UpdateByWhere(dataModel interface{}, where string, updates map[string]interface{}) error {
 	return DB.Model(dataModel).Where(where).Updates(updates).Error
 }
 
-func UpdateByField(where string, args, dataModel interface{}, column, expr string, updates ...interface{}) error {
-	return DB.Model(dataModel).Where(where, args).Update(column, gorm.Expr(expr, updates...)).Error
+func UpdateByModelWhere(whereModel interface{}, updates map[string]interface{}, ) error {
+	return DB.Model(whereModel).Updates(updates).Error
+}
+
+func UpdateByArgsWhere(dataModel interface{}, where string, args []interface{}, updates map[string]interface{}) error {
+	return DB.Model(dataModel).Where(where, args...).Updates(updates).Error
+}
+
+func UpdateByField(dataModel interface{}, where interface{}, column, expr string, updates ...interface{}) error {
+	//use example:
+	//m := UpdateModel{}
+	//err := UpdateByArgsField(&m, "id = ?", 1, "value", "value + ?", 1)
+	return DB.Model(dataModel).Where(where).Update(column, gorm.Expr(expr, updates...)).Error
+}
+
+func UpdateByArgsField(dataModel interface{}, where string, args []interface{}, column, expr string, updates ...interface{}) error {
+	//use example:
+	//m := UpdateModel{}
+	//err := UpdateByArgsField(&m, "id = ?", []interface{}{1}, "value", "value + ?", 1)
+	return DB.Model(dataModel).Where(where, args...).Update(column, gorm.Expr(expr, updates...)).Error
+}
+
+func UpdateByModelField(whereModel interface{}, column, expr string, updates ...interface{}) error {
+	//use example:
+	//m := UpdateModel{}
+	//m.Id = 1
+	//err := UpdateByModelField(&m, "value", "value + ?", 1)
+	return DB.Model(whereModel).Update(column, gorm.Expr(expr, updates...)).Error
 }
 
 func DeleteHardById(dataModels interface{}) error {
@@ -75,6 +101,10 @@ func DeleteSoftByWhere(dataModel interface{}, where string, args []interface{}) 
 
 func RetrieveById(id uint64, dataModel interface{}) error {
 	return DB.Where("id = ?", id).First(dataModel).Error
+}
+
+func RetrieveByModel(whereModel interface{}) error {
+	return DB.First(whereModel).Error
 }
 
 func RetrieveByWhere(pageSize, pageNo int, dataModel interface{}, where, order string, args []interface{}) (interface{}, int64, error) {
