@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -69,17 +68,18 @@ func Args(checkParamMethods ...func(c *gin.Context) (bool, error)) gin.HandlerFu
 				requestParams[k] = names
 			}
 		}
-		bys, err := ioutil.ReadAll(c.Request.Body)
-		if err == nil && bys != nil {
+		body := &bytes.Buffer{}
+		_, err = body.ReadFrom(c.Request.Body)
+		if err == nil && len(body.Bytes()) > 0 {
 			maps := make(map[string]interface{})
-			err = json.Unmarshal(bys, &maps)
+			err = json.Unmarshal(body.Bytes(), &maps)
 			if err == nil {
 				for k, v := range maps {
 					c.Set(k, v)
 					requestParams[k] = v
 				}
 			} else {
-				params := strings.Split(string(bys), "&")
+				params := strings.Split(string(body.Bytes()), "&")
 				for _, param := range params {
 					if strings.Contains(param, "=") {
 						arr := strings.Split(param, "=")

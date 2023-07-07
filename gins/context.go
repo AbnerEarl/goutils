@@ -2,6 +2,7 @@ package gins
 
 import (
 	"fmt"
+	"github.com/YouAreOnlyOne/goutils/utils"
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"net/http"
@@ -61,7 +62,8 @@ func (c *Context) ArgsInt64(key string) int64 {
 	var err error
 	data, exists := c.Get(key)
 	if exists && data != nil {
-		result, e := strconv.ParseInt(fmt.Sprint(data), 10, 64)
+		decimalData, _ := utils.NewFromString(fmt.Sprint(data))
+		result, e := strconv.ParseInt(decimalData.String(), 10, 64)
 		if e == nil {
 			return result
 		} else {
@@ -83,7 +85,8 @@ func (c *Context) ArgsInt64Default(key string, val int64) int64 {
 	var err error
 	data, exists := c.Get(key)
 	if exists && data != nil {
-		result, e := strconv.ParseInt(fmt.Sprint(data), 10, 64)
+		decimalData, _ := utils.NewFromString(fmt.Sprint(data))
+		result, e := strconv.ParseInt(decimalData.String(), 10, 64)
 		if e == nil {
 			return result
 		} else {
@@ -136,7 +139,8 @@ func (c *Context) ArgsInt64Array(key string) []int64 {
 		if reflect.TypeOf(data).Kind() == reflect.Slice {
 			arr := data.([]interface{})
 			for _, item := range arr {
-				v, e := strconv.ParseInt(fmt.Sprint(item), 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseInt(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -147,7 +151,8 @@ func (c *Context) ArgsInt64Array(key string) []int64 {
 		} else {
 			arr := strings.Split(fmt.Sprint(data), ",")
 			for _, item := range arr {
-				v, e := strconv.ParseInt(item, 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseInt(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -180,7 +185,8 @@ func (c *Context) ArgsInt64ArrayDefault(key string, val []int64) []int64 {
 		if reflect.TypeOf(data).Kind() == reflect.Slice {
 			arr := data.([]interface{})
 			for _, item := range arr {
-				v, e := strconv.ParseInt(fmt.Sprint(item), 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseInt(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -191,7 +197,8 @@ func (c *Context) ArgsInt64ArrayDefault(key string, val []int64) []int64 {
 		} else {
 			arr := strings.Split(fmt.Sprint(data), ",")
 			for _, item := range arr {
-				v, e := strconv.ParseInt(item, 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseInt(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -224,7 +231,8 @@ func (c *Context) ArgsUint64Array(key string) []uint64 {
 		if reflect.TypeOf(data).Kind() == reflect.Slice {
 			arr := data.([]interface{})
 			for _, item := range arr {
-				v, e := strconv.ParseUint(fmt.Sprint(item), 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseUint(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -235,7 +243,8 @@ func (c *Context) ArgsUint64Array(key string) []uint64 {
 		} else {
 			arr := strings.Split(fmt.Sprint(data), ",")
 			for _, item := range arr {
-				v, e := strconv.ParseUint(item, 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseUint(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -268,7 +277,8 @@ func (c *Context) ArgsUint64ArrayDefault(key string, val []uint64) []uint64 {
 		if reflect.TypeOf(data).Kind() == reflect.Slice {
 			arr := data.([]interface{})
 			for _, item := range arr {
-				v, e := strconv.ParseUint(fmt.Sprint(item), 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseUint(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -279,7 +289,8 @@ func (c *Context) ArgsUint64ArrayDefault(key string, val []uint64) []uint64 {
 		} else {
 			arr := strings.Split(fmt.Sprint(data), ",")
 			for _, item := range arr {
-				v, e := strconv.ParseUint(item, 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseUint(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -312,7 +323,8 @@ func (c *Context) ArgsUintArray(key string) []uint {
 		if reflect.TypeOf(data).Kind() == reflect.Slice {
 			arr := data.([]interface{})
 			for _, item := range arr {
-				v, e := strconv.ParseUint(fmt.Sprint(item), 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseUint(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -356,7 +368,8 @@ func (c *Context) ArgsUintArrayDefault(key string, val []uint) []uint {
 		if reflect.TypeOf(data).Kind() == reflect.Slice {
 			arr := data.([]interface{})
 			for _, item := range arr {
-				v, e := strconv.ParseUint(fmt.Sprint(item), 10, 64)
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.ParseUint(decimalData.String(), 10, 64)
 				if e != nil {
 					err = e
 					tag = false
@@ -400,7 +413,8 @@ func (c *Context) ArgsIntArray(key string) []int {
 		if reflect.TypeOf(data).Kind() == reflect.Slice {
 			arr := data.([]interface{})
 			for _, item := range arr {
-				v, e := strconv.Atoi(fmt.Sprint(item))
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.Atoi(decimalData.String())
 				if e != nil {
 					err = e
 					tag = false
@@ -444,7 +458,8 @@ func (c *Context) ArgsIntArrayDefault(key string, val []int) []int {
 		if reflect.TypeOf(data).Kind() == reflect.Slice {
 			arr := data.([]interface{})
 			for _, item := range arr {
-				v, e := strconv.Atoi(fmt.Sprint(item))
+				decimalData, _ := utils.NewFromString(fmt.Sprint(item))
+				v, e := strconv.Atoi(decimalData.String())
 				if e != nil {
 					err = e
 					tag = false
@@ -633,7 +648,8 @@ func (c *Context) ArgsInt(key string) int {
 	var err error
 	data, exists := c.Get(key)
 	if exists && data != nil {
-		result, e := strconv.Atoi(fmt.Sprint(data))
+		decimalData, _ := utils.NewFromString(fmt.Sprint(data))
+		result, e := strconv.Atoi(decimalData.String())
 		if e == nil {
 			return result
 		} else {
@@ -655,7 +671,8 @@ func (c *Context) ArgsIntDefault(key string, val int) int {
 	var err error
 	data, exists := c.Get(key)
 	if exists && data != nil {
-		result, e := strconv.Atoi(fmt.Sprint(data))
+		decimalData, _ := utils.NewFromString(fmt.Sprint(data))
+		result, e := strconv.Atoi(decimalData.String())
 		if e == nil {
 			return result
 		} else {
@@ -677,7 +694,8 @@ func (c *Context) ArgsUint64(key string) uint64 {
 	var err error
 	data, exists := c.Get(key)
 	if exists && data != nil {
-		result, e := strconv.ParseUint(fmt.Sprint(data), 10, 64)
+		decimalData, _ := utils.NewFromString(fmt.Sprint(data))
+		result, e := strconv.ParseUint(decimalData.String(), 10, 64)
 		if e == nil {
 			return result
 		} else {
@@ -699,7 +717,8 @@ func (c *Context) ArgsUint64Default(key string, val uint64) uint64 {
 	var err error
 	data, exists := c.Get(key)
 	if exists && data != nil {
-		result, e := strconv.ParseUint(fmt.Sprint(data), 10, 64)
+		decimalData, _ := utils.NewFromString(fmt.Sprint(data))
+		result, e := strconv.ParseUint(decimalData.String(), 10, 64)
 		if e == nil {
 			return result
 		} else {
@@ -765,7 +784,8 @@ func (c *Context) ArgsUint(key string) uint {
 	var err error
 	data, exists := c.Get(key)
 	if exists && data != nil {
-		result, e := strconv.ParseUint(fmt.Sprint(data), 10, 64)
+		decimalData, _ := utils.NewFromString(fmt.Sprint(data))
+		result, e := strconv.ParseUint(decimalData.String(), 10, 64)
 		if e == nil {
 			return uint(result)
 		} else {
@@ -787,7 +807,8 @@ func (c *Context) ArgsUintDefault(key string, val uint) uint {
 	var err error
 	data, exists := c.Get(key)
 	if exists && data != nil {
-		result, e := strconv.ParseUint(fmt.Sprint(data), 10, 64)
+		decimalData, _ := utils.NewFromString(fmt.Sprint(data))
+		result, e := strconv.ParseUint(decimalData.String(), 10, 64)
 		if e == nil {
 			return uint(result)
 		} else {
