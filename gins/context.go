@@ -21,13 +21,25 @@ type RouterGroup struct {
 	*gin.RouterGroup
 }
 
+type HandlerFunc func(*Context)
+
 func HandleFunc(handler func(c *Context)) func(ctx *gin.Context) {
 	return func(c *gin.Context) {
 		handler(&Context{Context: c})
 	}
 }
-func NewServer() *Server {
+
+func DefaultServer(mode string) *Server {
+	// the mode value is: debug, test, release
+	gin.SetMode(mode)
 	server := &Server{Engine: gin.Default()}
+	return server
+}
+
+func NewServer(mode string) *Server {
+	// the mode value is: debug, test, release
+	gin.SetMode(mode)
+	server := &Server{Engine: gin.New()}
 	return server
 }
 
@@ -878,6 +890,15 @@ func (c *Context) SaveFile(key, savePath string) error {
 	return c.SaveUploadedFile(f, savePath)
 }
 
+func (s *Server) Use(middlewares ...HandlerFunc) {
+	//Use 拓展中间件注册
+	sMiddlewares := make([]gin.HandlerFunc, 0)
+	for _, middleware := range middlewares {
+		sMiddlewares = append(sMiddlewares, HandleFunc(middleware))
+	}
+	s.Engine.Use(sMiddlewares...)
+}
+
 func (s *Server) Group(relativePath string, handlers ...func(c *Context)) *RouterGroup {
 	//Group 重写路由组注册
 	sHandlers := make([]gin.HandlerFunc, 0)
@@ -906,7 +927,7 @@ func (s *Server) POST(relativePath string, handlers ...func(c *Context)) gin.IRo
 }
 
 func (s *Server) PUT(relativePath string, handlers ...func(c *Context)) gin.IRoutes {
-	//POST 拓展PUT请求（根）
+	//PUT 拓展PUT请求（根）
 	sHandlers := make([]gin.HandlerFunc, 0)
 	for _, handle := range handlers {
 		sHandlers = append(sHandlers, HandleFunc(handle))
@@ -915,7 +936,7 @@ func (s *Server) PUT(relativePath string, handlers ...func(c *Context)) gin.IRou
 }
 
 func (s *Server) DELETE(relativePath string, handlers ...func(c *Context)) gin.IRoutes {
-	//POST 拓展DELETE请求（根）
+	//DELETE 拓展DELETE请求（根）
 	sHandlers := make([]gin.HandlerFunc, 0)
 	for _, handle := range handlers {
 		sHandlers = append(sHandlers, HandleFunc(handle))
@@ -924,12 +945,21 @@ func (s *Server) DELETE(relativePath string, handlers ...func(c *Context)) gin.I
 }
 
 func (s *Server) ANY(relativePath string, handlers ...func(c *Context)) gin.IRoutes {
-	//POST 拓展DELETE请求（根）
+	//ANY 拓展请求（根）
 	sHandlers := make([]gin.HandlerFunc, 0)
 	for _, handle := range handlers {
 		sHandlers = append(sHandlers, HandleFunc(handle))
 	}
 	return s.Engine.Any(relativePath, sHandlers...)
+}
+
+func (s *Server) NoRoute(relativePath string, handlers ...func(c *Context)) {
+	//ANY 拓展请求（根）
+	sHandlers := make([]gin.HandlerFunc, 0)
+	for _, handle := range handlers {
+		sHandlers = append(sHandlers, HandleFunc(handle))
+	}
+	s.Engine.NoRoute(sHandlers...)
 }
 
 func (r *RouterGroup) GET(relativePath string, handlers ...func(c *Context)) gin.IRoutes {
@@ -951,7 +981,7 @@ func (r *RouterGroup) POST(relativePath string, handlers ...func(c *Context)) gi
 }
 
 func (r *RouterGroup) PUT(relativePath string, handlers ...func(c *Context)) gin.IRoutes {
-	//GET 拓展Get请求（子）
+	//PUT 拓展Get请求（子）
 	rHandlers := make([]gin.HandlerFunc, 0)
 	for _, handle := range handlers {
 		rHandlers = append(rHandlers, HandleFunc(handle))
@@ -960,7 +990,7 @@ func (r *RouterGroup) PUT(relativePath string, handlers ...func(c *Context)) gin
 }
 
 func (r *RouterGroup) DELETE(relativePath string, handlers ...func(c *Context)) gin.IRoutes {
-	//POST 拓展Post请求（子）
+	//DELETE 拓展Post请求（子）
 	rHandlers := make([]gin.HandlerFunc, 0)
 	for _, handle := range handlers {
 		rHandlers = append(rHandlers, HandleFunc(handle))
@@ -969,7 +999,7 @@ func (r *RouterGroup) DELETE(relativePath string, handlers ...func(c *Context)) 
 }
 
 func (r *RouterGroup) ANY(relativePath string, handlers ...func(c *Context)) gin.IRoutes {
-	//POST 拓展Post请求（子）
+	//ANY 拓展请求（子）
 	rHandlers := make([]gin.HandlerFunc, 0)
 	for _, handle := range handlers {
 		rHandlers = append(rHandlers, HandleFunc(handle))

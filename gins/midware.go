@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/YouAreOnlyOne/goutils/jwts"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"
@@ -18,6 +19,7 @@ var WhitelistAPI = map[string]bool{
 	"/ping":                    true,
 	"/favicon.ico":             true,
 }
+var JwtSecret = "ABCDEFabcdef123456"
 
 func SendResponse(c *Context, err error, data interface{}) {
 	code, message := DecodeErr(err)
@@ -28,7 +30,7 @@ func SendResponse(c *Context, err error, data interface{}) {
 	})
 }
 
-func sendResponse(c *gin.Context, err error, data interface{}) {
+func sendResponse(c *Context, err error, data interface{}) {
 	code, message := DecodeErr(err)
 	c.JSON(http.StatusOK, Response{
 		Code:    code,
@@ -37,8 +39,8 @@ func sendResponse(c *gin.Context, err error, data interface{}) {
 	})
 }
 
-func Validate(checkToken func(token, apiPath string, c *gin.Context) (string, error)) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func Validate(checkToken func(token, apiPath string, c *Context) (string, error)) HandlerFunc {
+	return func(c *Context) {
 		if !WhitelistAPI[c.Request.URL.Path] {
 			//token校验
 			err := jwtVerify(c, checkToken)
@@ -52,8 +54,8 @@ func Validate(checkToken func(token, apiPath string, c *gin.Context) (string, er
 	}
 }
 
-func Args(checkParamMethods ...func(c *gin.Context) (bool, error)) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func Args(checkParamMethods ...func(c *Context) (bool, error)) HandlerFunc {
+	return func(c *Context) {
 
 		var requestParams = make(map[string]interface{})
 		form, err := c.MultipartForm()
@@ -130,7 +132,7 @@ func Args(checkParamMethods ...func(c *gin.Context) (bool, error)) gin.HandlerFu
 	}
 }
 
-func CheckPageParam(c *gin.Context) (bool, error) {
+func CheckPageParam(c *Context) (bool, error) {
 	data, exists := c.Get("page_no")
 	if exists && data != nil {
 		result, e := strconv.ParseUint(fmt.Sprint(data), 10, 64)
@@ -156,8 +158,8 @@ func CheckPageParam(c *gin.Context) (bool, error) {
 	return true, nil
 }
 
-func Cors() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func Cors() HandlerFunc {
+	return func(c *Context) {
 		method := c.Request.Method
 		origin := c.Request.Header.Get("Origin")
 		if origin != "" {
@@ -166,9 +168,9 @@ func Cors() gin.HandlerFunc {
 			//服务器支持的所有跨域请求的方法
 			c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
 			//允许跨域设置可以返回其他子段，可以自定义字段
-			c.Header("Access-Control-Allow-Headers", "Authorization, Content-Length, X-CSRF-Token, Token, session")
+			c.Header("Access-Control-Allow-Headers", "Authorization, Content-Length, X-CSRF-Token, Token, session, X_Requested_With ,Accept, Origin, Host, Connection, Accept-Encoding, Accept-Language, DNT, X-CustomHeader, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type, Bearer")
 			//允许浏览器（客户端）可以解析的头部
-			c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers")
+			c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, Bearer")
 			//设置缓存时间
 			c.Header("Access-Control-Max-Age", "172800")
 			//允许客户端传递校验信息比如 cookie
@@ -180,9 +182,9 @@ func Cors() gin.HandlerFunc {
 		//允许类型校验
 		if method == "OPTIONS" {
 			c.Header("Access-Control-Allow-Origin", "*")
-			c.Header("Access-Control-Allow-Headers", "Content-Type, AccessToken, X-CSRF-Token, Authorization, Token")
 			c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-			c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
+			c.Header("Access-Control-Allow-Headers", "Authorization, Content-Length, X-CSRF-Token, Token, session, X_Requested_With ,Accept, Origin, Host, Connection, Accept-Encoding, Accept-Language, DNT, X-CustomHeader, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type, Bearer")
+			c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, Bearer")
 			c.Header("Access-Control-Allow-Credentials", "true")
 			c.AbortWithStatus(http.StatusNoContent)
 		}
@@ -191,34 +193,65 @@ func Cors() gin.HandlerFunc {
 }
 
 // 验证token
-func jwtVerify(c *gin.Context, checkToken func(token, apiPath string, c *gin.Context) (string, error)) error {
+func jwtVerify(c *Context, checkToken func(token, apiPath string, c *Context) (string, error)) error {
 	token1 := c.GetHeader("token")
-	tk, _ := c.Get("token")
-	token2 := fmt.Sprint(tk)
-	if len(token1) < 1 && len(token2) < 1 {
+	tk1, _ := c.Get("token")
+	token2 := fmt.Sprint(tk1)
+	token3 := c.GetHeader("Authorization")
+	tk2, _ := c.Get("Authorization")
+	token4 := fmt.Sprint(tk2)
+	if len(token1) < 3 && len(token2) < 3 && len(token3) < 3 && len(token4) < 3 {
 		return ErrTokenInvalid
 	}
 	var token string
-	if len(token1) > 0 {
+	if len(token1) > 2 {
 		token = token1
-	} else {
+	} else if len(token3) > 2 {
+		token = token3
+	} else if len(token2) > 2 {
 		token = token2
+	} else {
+		token = token4
 	}
-
-	//验证token，并存储在请求中
+	if strings.HasPrefix(token, "Bearer") {
+		token = strings.Split(token, " ")[1]
+	}
 	apiPath := strings.Split(c.FullPath(), "/:")[0]
 	token, err := checkToken(token, apiPath, c)
 	if err != nil {
 		return err
 	}
-	if len(token) > 0 {
+	if len(token) < 3 {
+		return nil
+	}
+	if len(token1) > 2 {
 		c.Header("token", token)
+	} else if len(token3) > 2 {
+		c.Header("Authorization", token)
+	} else if len(token2) > 2 {
+		c.Set("token", token)
+	} else {
+		c.Set("Authorization", token)
 	}
 	return nil
 }
 
-func LogAop(dealLogInfo func(data LogData)) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func CheckToken(token, apiPath string, c *Context) (string, error) {
+	customClaims, err := jwts.ParseToken(token, JwtSecret)
+	c.Set("user_info", customClaims.UserInfo)
+	if err != nil {
+		return "", err
+	}
+	if time.Now().Unix() > customClaims.ExpiresAt {
+		return "", ErrTokenInvalid
+	} else if customClaims.ExpiresAt-time.Now().Unix() > 20*60 {
+		return jwts.RefreshToken(token, JwtSecret, 20)
+	}
+	return token, nil
+}
+
+func LogAop(dealLogInfo func(data LogData)) HandlerFunc {
+	return func(c *Context) {
 		startTime := time.Now()
 		blw := &BodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
 		c.Writer = blw

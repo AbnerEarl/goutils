@@ -7,7 +7,7 @@ var (
 	InternalError   = &Errno{Code: 10001, Message: "Internal server error"}
 	ErrTokenInvalid = &Errno{Code: 20001, Message: "The token was invalid."}
 	ErrParam        = &Errno{Code: 30001, Message: "The parameter is error."}
-	ErrPageParam    = &Errno{Code: 30002, Message: "The parameter of page no or page size is error"}
+	ErrPageParam    = &Errno{Code: 30002, Message: "The parameter of page_no or page_size is error"}
 )
 
 type Response struct {
@@ -50,7 +50,7 @@ type Err struct {
 	Err     error
 }
 
-func New(errno *Errno, err error) *Err {
+func NewErr(errno *Errno, err error) *Err {
 	return &Err{Code: errno.Code, Message: errno.Message, Err: err}
 }
 
