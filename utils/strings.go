@@ -80,14 +80,17 @@ func Byte2Any(b []byte, t reflect.Type) interface{} {
 		res, _ := strconv.Atoi(data)
 		return res
 	case reflect.Int64:
-		res, _ := strconv.ParseUint(data, 10, 64)
+		res, _ := strconv.ParseInt(data, 10, 64)
 		return res
 	case reflect.Uint:
 		res, _ := strconv.ParseUint(data, 10, 64)
-		return res
+		return uint(res)
 	case reflect.Uint64:
 		res, _ := strconv.ParseUint(data, 10, 64)
 		return res
+	case reflect.Float32:
+		res, _ := strconv.ParseFloat(data, 64)
+		return float32(res)
 	case reflect.Float64:
 		res, _ := strconv.ParseFloat(data, 64)
 		return res

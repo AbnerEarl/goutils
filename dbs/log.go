@@ -26,6 +26,6 @@ type LogInfoModel struct {
 	RequestToken  string    `json:"request_token" gorm:"column:request_token;null;type:text;comment:'请求Token'"`
 }
 
-func (c *LogInfoModel) TableName() string {
+func (m *LogInfoModel) TableName() string {
 	return "log_info"
 }

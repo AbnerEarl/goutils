@@ -15,6 +15,10 @@ var (
 	DefaultMaxLimit = 1000
 )
 
+type TX struct {
+	*gorm.DB
+}
+
 type BaseModel struct {
 	Id        uint64     `json:"id" gorm:"primary_key;AUTO_INCREMENT;column:id;comment:'主键ID'"`
 	IsDel     uint64     `json:"-" gorm:"column:is_del;default:0;comment:'删除标志'"`
@@ -24,8 +28,48 @@ type BaseModel struct {
 	Remark    string     `json:"remark" gorm:"column:remark;null;type:text;comment:'备注信息'"`
 }
 
-func (c *BaseModel) TableName() string {
+func (m *BaseModel) TableName() string {
 	return "base_info"
+}
+
+func (m *BaseModel) BeforeCreate(fc func(tx *TX) error) error {
+	f := HandleFunc(fc)
+	return DB.Transaction(f)
+}
+
+func (m *BaseModel) AfterCreate(fc func(tx *TX) error) error {
+	f := HandleFunc(fc)
+	return DB.Transaction(f)
+}
+
+func (m *BaseModel) BeforeSave(fc func(tx *TX) error) error {
+	f := HandleFunc(fc)
+	return DB.Transaction(f)
+}
+
+func (m *BaseModel) AfterSave(fc func(tx *TX) error) error {
+	f := HandleFunc(fc)
+	return DB.Transaction(f)
+}
+
+func (m *BaseModel) BeforeUpdate(fc func(tx *TX) error) error {
+	f := HandleFunc(fc)
+	return DB.Transaction(f)
+}
+
+func (m *BaseModel) AfterUpdate(fc func(tx *TX) error) error {
+	f := HandleFunc(fc)
+	return DB.Transaction(f)
+}
+
+func (m *BaseModel) BeforeDelete(fc func(tx *TX) error) error {
+	f := HandleFunc(fc)
+	return DB.Transaction(f)
+}
+
+func (m *BaseModel) AfterDelete(fc func(tx *TX) error) error {
+	f := HandleFunc(fc)
+	return DB.Transaction(f)
 }
 
 func Create(dataModel interface{}) error {
@@ -374,9 +418,9 @@ func RetrieveByWhereSelectBytes(pageSize, pageNo int, dataModel interface{}, fie
 	return bytes, count, nil
 }
 
-func RawSql(sql string) ([]map[string]interface{}, error) {
+func RawSql(sql string, values ...interface{}) ([]map[string]interface{}, error) {
 	results := make([]map[string]interface{}, 0)
-	rows, err := DB.Raw(sql).Rows()
+	rows, err := DB.Raw(sql, values...).Rows()
 	if err != nil {
 		return results, err
 	}
@@ -402,12 +446,21 @@ func Rows2Map(rows *sql.Rows) []map[string]interface{} {
 			if rowValue[i] == nil {
 				record[colType.Name()] = ""
 			} else {
-				record[colType.Name()] = utils.Byte2Any(rowValue[i].([]byte), colType.ScanType())
+				val, err := json.Marshal(rowValue[i])
+				if err != nil {
+					record[colType.Name()] = rowValue[i]
+				} else {
+					record[colType.Name()] = utils.Byte2Any(val, colType.ScanType())
+				}
 			}
 		}
 		res = append(res, record)
 	}
 	return res
+}
+
+func Exec(sql string, values ...interface{}) error {
+	return DB.Exec(sql, values...).Error
 }
 
 func RetrieveByModel(pageSize, pageNo int, whereModel interface{}, order string) (interface{}, int64, error) {
@@ -651,4 +704,30 @@ func RetrieveByModelSelectBytes(pageSize, pageNo int, whereModel interface{}, fi
 		return nil, count, err
 	}
 	return bytes, count, nil
+}
+
+func Transaction(fc func(tx *TX) error) error {
+	f := HandleFunc(fc)
+	return DB.Transaction(f)
+}
+
+func HandleFunc(handler func(tx *TX) error) func(db *gorm.DB) error {
+	return func(db *gorm.DB) error {
+		return handler(&TX{db})
+	}
+}
+
+func TruncateTable(dataModel interface{}) error {
+	tableName := ""
+	ref := reflect.ValueOf(dataModel)
+	method := ref.MethodByName("TableName")
+	if method.IsValid() {
+		r := method.Call([]reflect.Value{})
+		tableName = r[0].String()
+	} else {
+		return fmt.Errorf("the current model does not have a table name defined")
+	}
+	rSql := fmt.Sprintf("TRUNCATE TABLE %s;", tableName)
+	_, err := RawSql(rSql)
+	return err
 }

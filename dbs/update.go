@@ -18,7 +18,7 @@ type UpdateModel struct {
 	ExecuteTime time.Time `json:"execute_time" gorm:"column:execute_time;null;comment:'执行时间'"`
 }
 
-func (c *UpdateModel) TableName() string {
+func (m *UpdateModel) TableName() string {
 	return "update_info"
 }
 
