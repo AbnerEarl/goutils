@@ -22,11 +22,11 @@ func (m *UpdateModel) TableName() string {
 	return "update_info"
 }
 
-func InitDefaultData(basePath string) {
-	DB.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate(&UpdateModel{})
+func (db *DB) InitDefaultData(basePath string) {
+	db.Set("gorm:table_options", "charset=utf8mb4").AutoMigrate(&UpdateModel{})
 	fileList := files.GetPathBySuffix(basePath, ".sql")
 	recordList := make([]*UpdateModel, 0)
-	err := DB.Find(&recordList).Error
+	err := db.Find(&recordList).Error
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -77,7 +77,7 @@ func InitDefaultData(basePath string) {
 			if sql == "" {
 				continue
 			}
-			err = DB.Exec(sql).Error
+			err = db.DB.Exec(sql).Error
 			if err != nil {
 				fmt.Println(sql, err)
 				os.Exit(1)
@@ -86,7 +86,7 @@ func InitDefaultData(basePath string) {
 
 	}
 	if count > 0 {
-		err = DB.Exec(buffer.String()).Error
+		err = db.DB.Exec(buffer.String()).Error
 		if err != nil {
 			fmt.Println(buffer.String(), err)
 			os.Exit(1)
