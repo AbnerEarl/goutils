@@ -1,6 +1,9 @@
 #!/bin/bash
 
-configFile=$1 #conf/config_dev.yaml
+configFile=$1 #'conf/config_dev.yaml'
+apiDir=$2 #'handler|config'
+localIP=$3 #'150.109.95.231'
+
 uNames=$(uname -s)
 osName=${uNames:0:4}
 if [ "$osName" == "Darw" ]; then
@@ -22,16 +25,19 @@ fi
 
 source /etc/profile
 
-gateway=${gateway%.*}
-localIP=$(ifconfig | grep $gateway)
-localIP=${localIP##inet*}
-localIP=$(echo $localIP | cut -d' ' -f2)
 
-if [ ! -z "$2" ]; then
-  localIP=$2
+
+if [ ! -z "$localIP" ]; then
+  netp=${gateway%.*}
+  localIP=$(ifconfig | grep $netp)
+  localIP=${localIP##inet*}
+  localIP=$(echo $localIP | cut -d' ' -f2)
 fi
 
-swag init
+#swag init
+#swag init --exclude $(ls -d */ | grep -v 'handler|config' | tr '\n' ',')
+swag init --exclude $(ls -d */ | grep -v "$apiDir" | tr '\n' ',')
+
 serverPort=$(grep "addr: :" $configFile | cut -d ":" -f3 | cut -d " " -f1)
 configPort=$(grep "@host" main.go | cut -d ":" -f2)
 if [ "$osName" != "Darw" ]; then
