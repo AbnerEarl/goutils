@@ -55,7 +55,7 @@ func OpenDBPostgreSQL(username, password, ip string, port uint64, dbName string,
 		ip = "127.0.0.1"
 	}
 	if port < 1 {
-		port = 3306
+		port = 9920
 	}
 	if maxConn < 1 {
 		maxConn = DefaultMaxConn
@@ -100,7 +100,7 @@ func OpenDBSQLServer(username, password, ip string, port uint64, dbName string, 
 		ip = "127.0.0.1"
 	}
 	if port < 1 {
-		port = 3306
+		port = 9930
 	}
 	if maxConn < 1 {
 		maxConn = DefaultMaxConn
@@ -131,7 +131,7 @@ func OpenDBTiDB(username, password, ip string, port uint64, dbName string, dryRu
 		ip = "127.0.0.1"
 	}
 	if port < 1 {
-		port = 3306
+		port = 4000
 	}
 	if maxConn < 1 {
 		maxConn = DefaultMaxConn
@@ -162,7 +162,7 @@ func OpenDBClickhouse(username, password, ip string, port uint64, dbName string,
 		ip = "127.0.0.1"
 	}
 	if port < 1 {
-		port = 3306
+		port = 9000
 	}
 	if maxConn < 1 {
 		maxConn = DefaultMaxConn

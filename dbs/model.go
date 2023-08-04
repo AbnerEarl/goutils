@@ -7,6 +7,7 @@ import (
 	"github.com/YouAreOnlyOne/goutils/utils"
 	"gorm.io/gorm"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -418,14 +419,23 @@ func (db *DB) RetrieveByWhereSelectBytes(pageSize, pageNo int, dataModel interfa
 	return bytes, count, nil
 }
 
-func (db *DB) RawSql(sql string, values ...interface{}) ([]map[string]interface{}, error) {
-	results := make([]map[string]interface{}, 0)
+func (db *DB) RawSqlForMap(sql string, values ...interface{}) ([]map[string]interface{}, error) {
+	result := make([]map[string]interface{}, 0)
 	rows, err := db.Raw(sql, values...).Rows()
 	if err != nil {
-		return results, err
+		return result, err
 	}
-	results = Rows2Map(rows)
-	return results, nil
+	result = Rows2Map(rows)
+	return result, nil
+}
+
+func (db *DB) RawSqlForByte(sql string, values ...interface{}) ([]byte, error) {
+	rows, err := db.Raw(sql, values...).Rows()
+	if err != nil {
+		return nil, err
+	}
+	result := Rows2Bytes(rows)
+	return result, nil
 }
 
 func Rows2Map(rows *sql.Rows) []map[string]interface{} {
@@ -444,19 +454,50 @@ func Rows2Map(rows *sql.Rows) []map[string]interface{} {
 		record := make(map[string]interface{})
 		for i, colType := range colTypes {
 			if rowValue[i] == nil {
-				record[colType.Name()] = ""
+				record[colType.Name()] = rowValue[i]
 			} else {
-				val, err := json.Marshal(rowValue[i])
-				if err != nil {
-					record[colType.Name()] = rowValue[i]
+				if strings.Contains(reflect.TypeOf(rowValue[i]).String(), "[]uint8") {
+					record[colType.Name()] = utils.Byte2Any(rowValue[i].([]byte), colType.ScanType())
 				} else {
-					record[colType.Name()] = utils.Byte2Any(val, colType.ScanType())
+					val, err := json.Marshal(rowValue[i])
+					if err != nil {
+						record[colType.Name()] = rowValue[i]
+					} else {
+						record[colType.Name()] = utils.Byte2Any(val, colType.ScanType())
+					}
 				}
 			}
 		}
 		res = append(res, record)
 	}
 	return res
+}
+
+func Rows2Bytes(rows *sql.Rows) []byte {
+	res := make([]map[string]interface{}, 0)
+	colTypes, _ := rows.ColumnTypes()
+	var rowParam = make([]interface{}, len(colTypes))
+	var rowValue = make([]interface{}, len(colTypes))
+
+	for i, colType := range colTypes {
+		rowValue[i] = reflect.New(colType.ScanType())
+		rowParam[i] = reflect.ValueOf(&rowValue[i]).Interface()
+	}
+
+	for rows.Next() {
+		rows.Scan(rowParam...)
+		record := make(map[string]interface{})
+		for i, colType := range colTypes {
+			if rowValue[i] != nil && strings.Contains(reflect.TypeOf(rowValue[i]).String(), "[]uint8") {
+				record[colType.Name()] = utils.Byte2Any(rowValue[i].([]byte), colType.ScanType())
+			} else {
+				record[colType.Name()] = rowValue[i]
+			}
+		}
+		res = append(res, record)
+	}
+	result, _ := json.Marshal(res)
+	return result
 }
 
 func (db *DB) Exec(sql string, values ...interface{}) error {
@@ -728,6 +769,6 @@ func (db *DB) TruncateTable(dataModel interface{}) error {
 		return fmt.Errorf("the current model does not have a table name defined")
 	}
 	rSql := fmt.Sprintf("TRUNCATE TABLE %s;", tableName)
-	_, err := db.RawSql(rSql)
+	err := db.Exec(rSql)
 	return err
 }
