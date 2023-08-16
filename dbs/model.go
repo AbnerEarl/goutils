@@ -126,11 +126,11 @@ func (db *DB) UpdateByWhere(dataModel interface{}, where string, updates map[str
 }
 
 func (db *DB) UpdateByModelWhere(whereModel interface{}, updates map[string]interface{}) error {
-	return db.Model(whereModel).Updates(updates).Error
+	return db.Model(whereModel).Where(whereModel).Updates(updates).Error
 }
 
 func (db *DB) UpdateByModelWhereModel(whereModel interface{}, updateModel interface{}) error {
-	return db.Model(whereModel).Updates(updateModel).Error
+	return db.Model(whereModel).Where(whereModel).Updates(updateModel).Error
 }
 
 func (db *DB) UpdateByArgsWhere(dataModel interface{}, where string, args []interface{}, updates map[string]interface{}) error {
@@ -156,7 +156,7 @@ func (db *DB) UpdateByModelField(whereModel interface{}, column, expr string, up
 	//m := UpdateModel{}
 	//m.Id = 1
 	//err := UpdateByModelField(&m, "value", "value + ?", 1)
-	return db.Model(whereModel).Update(column, gorm.Expr(expr, updates...)).Error
+	return db.Model(whereModel).Where(whereModel).Update(column, gorm.Expr(expr, updates...)).Error
 }
 
 func (db *DB) DeleteHardById(dataModels interface{}) error {
@@ -177,6 +177,30 @@ func (db *DB) DeleteSoftByWhere(dataModel interface{}, where string, args []inte
 
 func (db *DB) RetrieveById(whereModel interface{}) error {
 	return db.First(whereModel).Error
+}
+
+func (db *DB) RetrieveByFind(whereModel interface{}) error {
+	return db.Model(whereModel).Where(whereModel).First(whereModel).Error
+}
+
+func (db *DB) RetrieveByMap(dataModel interface{}, whereMap map[string]interface{}) error {
+	return db.First(dataModel).First(&whereMap).Error
+}
+
+func (db *DB) RetrieveByArgs(dataModel interface{}, where string, args []interface{}) error {
+	return db.Where(where, args...).First(dataModel).Error
+}
+
+func (db *DB) RetrieveCountByArgs(dataModel interface{}, where string, args []interface{}) (int64, error) {
+	var count int64 = 0
+	err := db.Model(dataModel).Where(where, args...).Count(&count).Error
+	return count, err
+}
+
+func (db *DB) RetrieveCountByModel(whereModel interface{}) (int64, error) {
+	var count int64 = 0
+	err := db.Model(whereModel).Where(whereModel).Count(&count).Error
+	return count, err
 }
 
 func (db *DB) RetrieveByWhere(pageSize, pageNo int, dataModel interface{}, order, where string, args []interface{}) (interface{}, int64, error) {
@@ -512,7 +536,7 @@ func (db *DB) RetrieveByModel(pageSize, pageNo int, whereModel interface{}, orde
 	//dataList := result.(*[]*dbs.UpdateModel)
 	//fmt.Println((*data)[0])
 	var count int64 = 0
-	if err := db.Model(whereModel).Count(&count).Error; err != nil {
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
 		return nil, count, err
 	}
 	if pageSize == 0 {
@@ -532,6 +556,7 @@ func (db *DB) RetrieveByModel(pageSize, pageNo int, whereModel interface{}, orde
 	results := reflect.New(itemSlice)
 	if err := db.
 		Model(whereModel).
+		Where(whereModel).
 		Offset(offset).
 		Limit(pageSize).
 		Order(order).
@@ -548,7 +573,7 @@ func (db *DB) RetrieveByModelString(pageSize, pageNo int, whereModel interface{}
 	//result, count, err := RetrieveByModelString(0, 0, &m, "")
 	//fmt.Println(result)
 	var count int64 = 0
-	if err := db.Model(whereModel).Count(&count).Error; err != nil {
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
 		return "", count, err
 	}
 	if pageSize == 0 {
@@ -568,6 +593,7 @@ func (db *DB) RetrieveByModelString(pageSize, pageNo int, whereModel interface{}
 	results := reflect.New(itemSlice)
 	if err := db.
 		Model(whereModel).
+		Where(whereModel).
 		Offset(offset).
 		Limit(pageSize).
 		Order(order).
@@ -590,7 +616,7 @@ func (db *DB) RetrieveByModelBytes(pageSize, pageNo int, whereModel interface{},
 	//json.Unmarshal(result,&dataList)
 	//fmt.Println(dataList)
 	var count int64 = 0
-	if err := db.Model(whereModel).Count(&count).Error; err != nil {
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
 		return nil, count, err
 	}
 	if pageSize == 0 {
@@ -610,6 +636,7 @@ func (db *DB) RetrieveByModelBytes(pageSize, pageNo int, whereModel interface{},
 	results := reflect.New(itemSlice)
 	if err := db.
 		Model(whereModel).
+		Where(whereModel).
 		Offset(offset).
 		Limit(pageSize).
 		Order(order).
@@ -631,7 +658,7 @@ func (db *DB) RetrieveByModelSelect(pageSize, pageNo int, whereModel interface{}
 	//dataList := result.(*[]*dbs.UpdateModel)
 	//fmt.Println((*dataList)[0])
 	var count int64
-	if err := db.Model(whereModel).Count(&count).Error; err != nil {
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
 		return nil, count, err
 	}
 	if pageSize == 0 {
@@ -651,6 +678,7 @@ func (db *DB) RetrieveByModelSelect(pageSize, pageNo int, whereModel interface{}
 	results := reflect.New(itemSlice)
 	if err := db.
 		Model(whereModel).
+		Where(whereModel).
 		Select(fields).
 		Offset(offset).
 		Limit(pageSize).
@@ -668,7 +696,7 @@ func (db *DB) RetrieveByModelSelectString(pageSize, pageNo int, whereModel inter
 	//result, count, err := RetrieveByModelSelectString(0, 0, &m, []string{"id", "name"}, "")
 	//fmt.Println(result)
 	var count int64
-	if err := db.Model(whereModel).Count(&count).Error; err != nil {
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
 		return "", count, err
 	}
 	if pageSize == 0 {
@@ -688,6 +716,7 @@ func (db *DB) RetrieveByModelSelectString(pageSize, pageNo int, whereModel inter
 	results := reflect.New(itemSlice)
 	if err := db.
 		Model(whereModel).
+		Where(whereModel).
 		Select(fields).
 		Offset(offset).
 		Limit(pageSize).
@@ -712,7 +741,7 @@ func (db *DB) RetrieveByModelSelectBytes(pageSize, pageNo int, whereModel interf
 	//json.Unmarshal(result,&dataList)
 	//fmt.Println(dataList)
 	var count int64
-	if err := db.Model(whereModel).Count(&count).Error; err != nil {
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
 		return nil, count, err
 	}
 	if pageSize == 0 {
@@ -732,6 +761,7 @@ func (db *DB) RetrieveByModelSelectBytes(pageSize, pageNo int, whereModel interf
 	results := reflect.New(itemSlice)
 	if err := db.
 		Model(whereModel).
+		Where(whereModel).
 		Select(fields).
 		Offset(offset).
 		Limit(pageSize).
