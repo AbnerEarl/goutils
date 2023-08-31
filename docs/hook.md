@@ -48,7 +48,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/YouAreOnlyOne/goutils/hook"
+	"github.com/AbanerEarl/goutils/hook"
 	"os"
 )
 

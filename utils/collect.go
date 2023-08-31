@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 )
 
 func RemoveDuplicateElement(s []interface{}) []interface{} {
@@ -39,4 +40,83 @@ func Append(slice interface{}, elements interface{}) []interface{} {
 		result = append(result, elements)
 	}
 	return result
+}
+
+func Struct2Map(model interface{}, tagName string) map[string]interface{} {
+	/**
+	 * @author: yangchangjia
+	 * @email 1320259466@qq.com
+	 * @date: 2023/8/29 6:49 PM
+	 * @desc: about the role of function.
+	 * @param model: an struct or struct pointer.
+	 * @param tagName: field conversion flag, default value is "", can be set, "json",etc.
+	 * @return map
+	 */
+	v := reflect.ValueOf(model)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	t := v.Type()
+	var data = make(map[string]interface{})
+	for i := 0; i < t.NumField(); i++ {
+		if !strings.Contains(v.Field(i).String(), "time.Time") && (v.Field(i).Kind() == reflect.Struct || v.Field(i).Kind() == reflect.Ptr) {
+			items := Struct2Map(v.Field(i).Interface(), tagName)
+			for k, m := range items {
+				data[k] = m
+			}
+		} else {
+			if !IsEmpty(tagName) {
+				tag := t.Field(i).Tag.Get(tagName)
+				if tag == "-" {
+					continue
+				}
+				if !IsEmpty(tag) {
+					data[tag] = v.Field(i).Interface()
+					continue
+				}
+			}
+			data[t.Field(i).Name] = v.Field(i).Interface()
+		}
+	}
+	return data
+}
+
+func Struct2MapNoZero(model interface{}, tagName string) map[string]interface{} {
+	/**
+	 * @author: yangchangjia
+	 * @email 1320259466@qq.com
+	 * @date: 2023/8/29 6:31 PM
+	 * @desc: about the role of function.
+	 * @param model: an struct or struct pointer.
+	 * @param tagName: field conversion flag, default value is "", can be set, "json",etc.
+	 * @return map
+	 */
+
+	v := reflect.ValueOf(model)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	t := v.Type()
+	var data = make(map[string]interface{})
+	for i := 0; i < t.NumField(); i++ {
+		if !strings.Contains(v.Field(i).String(), "time.Time") && (v.Field(i).Kind() == reflect.Struct || v.Field(i).Kind() == reflect.Ptr) {
+			items := Struct2MapNoZero(v.Field(i).Interface(), tagName)
+			for k, m := range items {
+				data[k] = m
+			}
+		} else if !v.Field(i).IsZero() {
+			if !IsEmpty(tagName) {
+				tag := t.Field(i).Tag.Get(tagName)
+				if tag == "-" {
+					continue
+				}
+				if !IsEmpty(tag) {
+					data[tag] = v.Field(i).Interface()
+					continue
+				}
+			}
+			data[t.Field(i).Name] = v.Field(i).Interface()
+		}
+	}
+	return data
 }

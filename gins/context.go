@@ -2,7 +2,7 @@ package gins
 
 import (
 	"fmt"
-	"github.com/YouAreOnlyOne/goutils/utils"
+	"github.com/AbanerEarl/goutils/utils"
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"net/http"

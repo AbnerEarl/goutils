@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 	"unicode"
 	"unsafe"
 )
@@ -21,6 +22,18 @@ func StrLength(str string) int {
 		}
 	}
 	return count
+}
+
+func StrTrim(str string) string {
+	str = strings.TrimSpace(str)
+	for true {
+		if strings.Contains(str, "  ") {
+			str = strings.ReplaceAll(str, "  ", " ")
+		} else {
+			break
+		}
+	}
+	return str
 }
 
 func ChEnLength(str string) int {

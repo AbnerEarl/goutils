@@ -1,7 +1,7 @@
 package gins
 
 import (
-	"github.com/YouAreOnlyOne/goutils/times"
+	"github.com/AbanerEarl/goutils/times"
 	"os"
 	"path/filepath"
 	"time"

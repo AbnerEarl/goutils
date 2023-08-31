@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/YouAreOnlyOne/goutils/utils"
+	"github.com/AbanerEarl/goutils/utils"
 	"gorm.io/gorm"
 	"reflect"
 	"strings"
