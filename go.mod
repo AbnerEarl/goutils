@@ -1,4 +1,4 @@
-module github.com/AbanerEarl/goutils
+module github.com/AbnerEarl/goutils
 
 go 1.18
 

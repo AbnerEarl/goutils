@@ -3,7 +3,7 @@ package mongoc
 import (
 	"bufio"
 	"fmt"
-	"github.com/AbanerEarl/goutils/files"
+	"github.com/AbnerEarl/goutils/files"
 	"io"
 	"os"
 	"strings"

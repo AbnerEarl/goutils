@@ -12,7 +12,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/AbanerEarl/goutils/uuid"
+	"github.com/AbnerEarl/goutils/uuid"
 	"io"
 	"mime/multipart"
 	"net/http"

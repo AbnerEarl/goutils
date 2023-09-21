@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/AbanerEarl/goutils/jwts"
+	"github.com/AbnerEarl/goutils/jwts"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"
