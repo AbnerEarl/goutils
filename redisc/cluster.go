@@ -6,10 +6,7 @@ import (
 	"time"
 )
 
-func InitRedisCluster(addrs []string, db, poolSize, idleConns int, username, password string) *RedisClusterCli {
-	if db < 0 {
-		db = 0
-	}
+func InitRedisCluster(addrs []string, poolSize, idleConns int, username, password string) *RedisClusterCli {
 	if poolSize < 1 {
 		poolSize = 100
 	}
