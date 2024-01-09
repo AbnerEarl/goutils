@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
+	"time"
 )
 
 type DB struct {
@@ -45,8 +46,10 @@ func OpenDBMySQL(username, password, ip string, port uint64, dbName string, dryR
 	}
 
 	dc, _ := db.DB()
-	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接mysql出现too many connections的错误。
+	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接出现too many connections的错误。
 	dc.SetMaxIdleConns(int(idleConn)) // 用于设置闲置的连接数.设置闲置的连接数则当开启的一个连接使用完成后可以放在池里等候下一次使用。
+	dc.SetConnMaxIdleTime(time.Hour)
+	dc.SetConnMaxLifetime(24 * time.Hour)
 	return &DB{db}
 }
 
@@ -76,13 +79,15 @@ func OpenDBPostgreSQL(username, password, ip string, port uint64, dbName string,
 	}
 
 	dc, _ := db.DB()
-	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接mysql出现too many connections的错误。
+	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接出现too many connections的错误。
 	dc.SetMaxIdleConns(int(idleConn)) // 用于设置闲置的连接数.设置闲置的连接数则当开启的一个连接使用完成后可以放在池里等候下一次使用。
+	dc.SetConnMaxIdleTime(time.Hour)
+	dc.SetConnMaxLifetime(24 * time.Hour)
 	return &DB{db}
 }
 
-func OpenDBSQLite(fileName string, dryRun bool, maxConn, idleConn uint64, customConn string) *DB {
-	db, err := gorm.Open(sqlite.Open(fileName), &gorm.Config{
+func OpenDBSQLite(filePath string, dryRun bool, maxConn, idleConn uint64, customConn string) *DB {
+	db, err := gorm.Open(sqlite.Open(filePath), &gorm.Config{
 		DryRun: dryRun,
 	})
 	if err != nil {
@@ -90,8 +95,10 @@ func OpenDBSQLite(fileName string, dryRun bool, maxConn, idleConn uint64, custom
 	}
 
 	dc, _ := db.DB()
-	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接mysql出现too many connections的错误。
+	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接出现too many connections的错误。
 	dc.SetMaxIdleConns(int(idleConn)) // 用于设置闲置的连接数.设置闲置的连接数则当开启的一个连接使用完成后可以放在池里等候下一次使用。
+	dc.SetConnMaxIdleTime(time.Hour)
+	dc.SetConnMaxLifetime(24 * time.Hour)
 	return &DB{db}
 }
 
@@ -121,8 +128,10 @@ func OpenDBSQLServer(username, password, ip string, port uint64, dbName string, 
 	}
 
 	dc, _ := db.DB()
-	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接mysql出现too many connections的错误。
+	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接出现too many connections的错误。
 	dc.SetMaxIdleConns(int(idleConn)) // 用于设置闲置的连接数.设置闲置的连接数则当开启的一个连接使用完成后可以放在池里等候下一次使用。
+	dc.SetConnMaxIdleTime(time.Hour)
+	dc.SetConnMaxLifetime(24 * time.Hour)
 	return &DB{db}
 }
 
@@ -152,8 +161,10 @@ func OpenDBTiDB(username, password, ip string, port uint64, dbName string, dryRu
 	}
 
 	dc, _ := db.DB()
-	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接mysql出现too many connections的错误。
+	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接出现too many connections的错误。
 	dc.SetMaxIdleConns(int(idleConn)) // 用于设置闲置的连接数.设置闲置的连接数则当开启的一个连接使用完成后可以放在池里等候下一次使用。
+	dc.SetConnMaxIdleTime(time.Hour)
+	dc.SetConnMaxLifetime(24 * time.Hour)
 	return &DB{db}
 }
 
@@ -183,8 +194,10 @@ func OpenDBClickhouse(username, password, ip string, port uint64, dbName string,
 	}
 
 	dc, _ := db.DB()
-	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接mysql出现too many connections的错误。
+	dc.SetMaxOpenConns(int(maxConn))  // 用于设置最大打开的连接数，默认值为0表示不限制.设置最大的连接数，可以避免并发太高导致连接出现too many connections的错误。
 	dc.SetMaxIdleConns(int(idleConn)) // 用于设置闲置的连接数.设置闲置的连接数则当开启的一个连接使用完成后可以放在池里等候下一次使用。
+	dc.SetConnMaxIdleTime(time.Hour)
+	dc.SetConnMaxLifetime(24 * time.Hour)
 	return &DB{db}
 }
 
