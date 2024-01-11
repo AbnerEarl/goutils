@@ -1,156 +1,104 @@
-
-## [English](https://github.com/AbnerEarl/goutils/blob/main/README.md) ｜  [中文](https://github.com/AbnerEarl/goutils/blob/main/Chinese.md)
-
 # goutils
-Some very useful middleware libraries are re-encapsulated and are very simple and efficient to use, which can save a lot of development time, improve work efficiency and avoid duplication of code.
+一些非常有用的中间件库二次封装，使用起来非常简单高效，能够节省大量的开发时间，提高工作效率，避免重复代码。
 
 
-## Have the ability
-- MySql stand-alone or cluster
-- PostgreSQL standalone or cluster
-- SQLite standalone or cluster
-- SQLServer stand-alone or cluster
-- TiDB stand-alone or cluster
-- Clickhouse standalone or cluster
-- Redis stand-alone or cluster
-- captcha verification code generation
-- cmdc external command call
-- datas data structure conversion
-- emails mail processing
-- elasticsearch multi-version compatible package
-- files file tool method encapsulation
-- The gins web framework is highly encapsulated
-- hook dynamic code execution
-- httpc network request client encapsulation
-- injects dependency injection and mapping
-- jwts network request authentication
-  -kafkas standalone or cluster
-- machine machine code generation
-- mongoc stand-alone or cluster
-- scripts multifunctional scripts
-- tests automated tests
-- times time and date method encapsulation
-- utils independent tool library
-- uuid unique ID generator
--
+## 具有能力
+- MySql 单机或集群
+- PostgreSQL 单机或集群
+- SQLite 单机或集群
+- SQLServer 单机或集群
+- TiDB 单机或集群
+- Clickhouse 单机或集群
+- Redis 单机或集群
+- captcha 验证码生成
+- cmdc 外部命令调用
+- datas 数据结构转换
+- emails 邮件处理
+- elasticsearch 多版本兼容封装
+- files 文件工具方法封装
+- gins web框架高度封装
+- hook 动态代码执行
+- httpc 网络请求客户端封装
+- injects 依赖注入和映射
+- jwts 网络请求鉴权
+- kafkas 单机或集群
+- machine 机器码生成
+- mongoc 单机或集群
+- scripts 多功能脚本
+- tests 自动化测试
+- times 时间日期方法封装
+- utils 独立工具库
+- uuid 唯一ID生成器
+- 
 
 
-Other tool libraries are being gradually improved and encapsulated.
-
-
-
+其他工具库正在逐步完善和封装。
 
 
 
+## 举个例子
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## for example
-
-Mysql cluster database connection uses:
+mysql集群数据库连接使用：
 
 ```
 
 package main
 
 import (
-"encoding/json"
-"fmt"
-"github.com/AbnerEarl/goutils/dbs"
-"time"
+	"encoding/json"
+	"fmt"
+	"github.com/AbnerEarl/goutils/dbs"
+	"time"
 )
 
 
 
 func mai() {
-//Connect to the database cluster
-dsns := []string{
-"root:password@tcp(101.152.77.55:3306)/test?charset=utf8&parseTime=true",
-"root:password@tcp(101.159.16.231:3306)/test?charset=utf8&parseTime=true",
-"root:password@tcp(101.159.16.88:3306)/test?charset=utf8&parseTime=true",
-}
-db := dbs.OpenDBMySQLCluster(dsns, false, 0, 0)
+	//连接数据库集群
+	dsns := []string{
+		"root:password@tcp(101.152.77.55:3306)/test?charset=utf8&parseTime=true",
+		"root:password@tcp(101.159.16.231:3306)/test?charset=utf8&parseTime=true",
+		"root:password@tcp(101.159.16.88:3306)/test?charset=utf8&parseTime=true",
+	}
+	db := dbs.OpenDBMySQLCluster(dsns, false, 0, 0)
 
-//Automatically create a table or update the table structure
-db.Migration([]interface{}{&dbs.UpdateModel{}})
+	//自动创建表或者更新表结构
+	db.Migration([]interface{}{&dbs.UpdateModel{}})
 
-//Define an entity
-up := dbs.UpdateModel{
-FileName: "test",
-ExecuteTime: time.Now(),
-}
+	//定义一个实体
+	up := dbs.UpdateModel{
+		FileName:    "test",
+		ExecuteTime: time.Now(),
+	}
 
-//Save data to database
-err := db.Create(&up)
-fmt.Println("create result: ", err)
+	//保存数据到数据库
+	err := db.Create(&up)
+	fmt.Println("create result: ", err)
 
-//Query a piece of data
-up2 := dbs.UpdateModel{}
-err = db.RetrieveByFind(&up2)
-fmt.Println("retrieve result: ", err)
-fmt.Println(up2)
+	//查询一条数据
+	up2 := dbs.UpdateModel{}
+	err = db.RetrieveByFind(&up2)
+	fmt.Println("retrieve result: ", err)
+	fmt.Println(up2)
 
-//delete data
-err = db.DeleteHardById(&up2)
-fmt.Println("delete result: ", err)
+	//删除数据
+	err = db.DeleteHardById(&up2)
+	fmt.Println("delete result: ", err)
 
-//Batch insert into database
-var ups = []dbs.UpdateModel{{FileName: "uu1", ExecuteTime: time.Now()}, {FileName: "uu2", ExecuteTime: time.Now()}, {FileName: "uu3", ExecuteTime: time.Now()}}
-err = db.CreateBatch(ups, 100)
-fmt.Println("batch result: ", err)
+	//批量插入数据库
+	var ups = []dbs.UpdateModel{{FileName: "uu1", ExecuteTime: time.Now()}, {FileName: "uu2", ExecuteTime: time.Now()}, {FileName: "uu3", ExecuteTime: time.Now()}}
+	err = db.CreateBatch(ups, 100)
+	fmt.Println("batch result: ", err)
 
-//Batch query database
-bys, count, err := db.RetrieveByWhereBytes(10, 1, &dbs.UpdateModel{}, "", "", nil)
-if err != nil {
-return
-}
-fmt.Println("total count: ", count)
-var result[]dbs.UpdateModel
-json.Unmarshal(bys, &result)
-fmt.Println(result)
+	//批量查询数据库
+	bys, count, err := db.RetrieveByWhereBytes(10, 1, &dbs.UpdateModel{}, "", "", nil)
+	if err != nil {
+		return
+	}
+	fmt.Println("total count: ", count)
+	var result []dbs.UpdateModel
+	json.Unmarshal(bys, &result)
+	fmt.Println(result)
 }
 
 
@@ -160,7 +108,7 @@ fmt.Println(result)
 
 ```
 
-go run main.go
+go run main.go 
 
 
 ```
@@ -169,22 +117,20 @@ go run main.go
 
 ```
 
-create result: <nil>
-retrieve result: <nil>
+create result:  <nil>
+retrieve result:  <nil>
 {{3 0 2024-01-09 07:25:16.067 +0000 UTC 2024-01-09 07:25:16.067 +0000 UTC <nil> } test 2024-01-09 07:25:16.036 +0000 UTC}
-delete result: <nil>
+delete result:  <nil>
 batch result: <nil>
-total count: 16
-[{{6 0 2024-01-09 07:25:16.224 +0000 UTC 2024-01-09 07:25:16.224 +0000 UTC <nil> } uu1 2024-01-09 07:25:16.194 +0000 UTC} {{9 0 2024-01-09 07:25:16.224 +0000 UTC 2024-01-09 07:25:16.224 +0000 UTC <nil> } uu2 2024-01-09 07:25:16.194 +0000 UTC} { {12 0 2024-01-09 07:25:16.224 +0000 UTC 2024-01-09 07:25:16.224 +0000 UTC <nil> } uu3 2024-01-09 07:25:16.194 +0000 UTC} {{ 14 0 2024-01-09 07:35:35.615 +0000 UTC 2024-01-09 07:35:35.615 +0000 UTC <nil> } test222 2024-01-09 07:35:35.585 +0000 UTC} {{16 0 2024-01-09 07:35:35.781 +0000 UTC 2024-01-09 07:35:35.781 +0000 UTC <nil> } uu1 2024-01-09 07:35:35.751 +0000 UTC} {{18 0 2024-01-09 07:35:35.781 +0000 UTC 2024-01-09 07:35:35.781 +0000 UTC <nil> } uu2 2024-01-09 07:35:35.751 +0000 UTC} {{20 0 2024 -01-09 07:35:35.781 +0000 UTC 2024-01-09 07:35:35.781 +0000 UTC <nil> } uu3 2024-01-09 07:35:35.751 +0000 UTC} {{21 0 2024- 01-09 07:41:35.85 +0000 UTC 2024-01-09 07:41:35.85 +0000 UTC <nil> } test333 2024-01-09 07:41:35.819 +0000 UTC} {{23 0 2024-01 -09 08:03:15.64 +0000 UTC 2024-01-09 08:03:15.64 +0000 UTC <nil> } test4444 2024-01-09 08:03:15.587 +0000 UTC} {{25 0 2024-01- 09 08:03:15.881 +0000 UTC 2024-01-09 08:03:15.881 +0000 UTC <nil> } uu1 2024-01-09 08:03:15.837 +0000 UTC}]
+total count:  16
+[{{6 0 2024-01-09 07:25:16.224 +0000 UTC 2024-01-09 07:25:16.224 +0000 UTC <nil> } uu1 2024-01-09 07:25:16.194 +0000 UTC} {{9 0 2024-01-09 07:25:16.224 +0000 UTC 2024-01-09 07:25:16.224 +0000 UTC <nil> } uu2 2024-01-09 07:25:16.194 +0000 UTC} {{12 0 2024-01-09 07:25:16.224 +0000 UTC 2024-01-09 07:25:16.224 +0000 UTC <nil> } uu3 2024-01-09 07:25:16.194 +0000 UTC} {{14 0 2024-01-09 07:35:35.615 +0000 UTC 2024-01-09 07:35:35.615 +0000 UTC <nil> } test222 2024-01-09 07:35:35.585 +0000 UTC} {{16 0 2024-01-09 07:35:35.781 +0000 UTC 2024-01-09 07:35:35.781 +0000 UTC <nil> } uu1 2024-01-09 07:35:35.751 +0000 UTC} {{18 0 2024-01-09 07:35:35.781 +0000 UTC 2024-01-09 07:35:35.781 +0000 UTC <nil> } uu2 2024-01-09 07:35:35.751 +0000 UTC} {{20 0 2024-01-09 07:35:35.781 +0000 UTC 2024-01-09 07:35:35.781 +0000 UTC <nil> } uu3 2024-01-09 07:35:35.751 +0000 UTC} {{21 0 2024-01-09 07:41:35.85 +0000 UTC 2024-01-09 07:41:35.85 +0000 UTC <nil> } test333 2024-01-09 07:41:35.819 +0000 UTC} {{23 0 2024-01-09 08:03:15.64 +0000 UTC 2024-01-09 08:03:15.64 +0000 UTC <nil> } test4444 2024-01-09 08:03:15.587 +0000 UTC} {{25 0 2024-01-09 08:03:15.881 +0000 UTC 2024-01-09 08:03:15.881 +0000 UTC <nil> } uu1 2024-01-09 08:03:15.837 +0000 UTC}]
 
 
 ```
 
+## 主要方法
 
-
-## Main method
-
-Each tool library encapsulates a number of methods, which can be viewed under the corresponding package. Taking the use of dbs database as an example, the Create,Retrieve,Update,Delete (CRUD) method is complete. Some method examples are as follows:
+每个工具库都封装了若干方法，可以到对应的包下面查看，以dbs数据库使用举例，增删改查（CRUD）方法都是完备的，部分方法示例如下：
 
 ```
 
@@ -241,11 +187,13 @@ func (db *DB) Transaction(fc func(tx *TX) error) error {
 ```
 
 
-For complex tool library usage, you can view relevant documents in the docs directory.
+复杂的工具库使用方法都可以到 docs 目录下查看相关文档。
 
 
 
-## Related instructions
+## 相关说明
 
-Interested friends are welcome to participate or make valuable suggestions.
+欢迎有兴趣的朋友一起参与，或提出宝贵建议。
+
+
 
