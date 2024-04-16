@@ -16,6 +16,7 @@ import (
 	"hash"
 	"io"
 	"net"
+	"strings"
 	"sync"
 	"time"
 )
@@ -76,6 +77,142 @@ func NewV6() (UUID, error) {
 // releases until the spec is final.
 func NewV7() (UUID, error) {
 	return DefaultGenerator.NewV7()
+}
+
+// NewV1Str returns a UUID based on the current timestamp and MAC address.
+func NewV1Str() (string, error) {
+	v1, err := DefaultGenerator.NewV1()
+	if err != nil {
+		return "", err
+	}
+	return v1.String(), nil
+}
+
+// NewV3Str returns a UUID based on the MD5 hash of the namespace UUID and name.
+func NewV3Str(ns UUID, name string) string {
+	return DefaultGenerator.NewV3(ns, name).String()
+}
+
+// NewV4Str returns a randomly generated UUID.
+func NewV4Str() (string, error) {
+	v4, err := DefaultGenerator.NewV4()
+	if err != nil {
+		return "", err
+	}
+	return v4.String(), nil
+}
+
+// NewV5Str returns a UUID based on SHA-1 hash of the namespace UUID and name.
+func NewV5Str(ns UUID, name string) string {
+	return DefaultGenerator.NewV5(ns, name).String()
+}
+
+// NewV6Str returns a k-sortable UUID based on a timestamp and 48 bits of
+// pseudorandom data. The timestamp in a V6 UUID is the same as V1, with the bit
+// order being adjusted to allow the UUID to be k-sortable.
+//
+// This is implemented based on revision 03 of the Peabody UUID draft, and may
+// be subject to change pending further revisions. Until the final specification
+// revision is finished, changes required to implement updates to the spec will
+// not be considered a breaking change. They will happen as a minor version
+// releases until the spec is final.
+func NewV6Str() (string, error) {
+	v6, err := DefaultGenerator.NewV6()
+	if err != nil {
+		return "", err
+	}
+	return v6.String(), nil
+}
+
+// NewV7Str returns a k-sortable UUID based on the current millisecond precision
+// UNIX epoch and 74 bits of pseudorandom data. It supports single-node batch generation (multiple UUIDs in the same timestamp) with a Monotonic Random counter.
+//
+// This is implemented based on revision 04 of the Peabody UUID draft, and may
+// be subject to change pending further revisions. Until the final specification
+// revision is finished, changes required to implement updates to the spec will
+// not be considered a breaking change. They will happen as a minor version
+// releases until the spec is final.
+func NewV7Str() (string, error) {
+	v7, err := DefaultGenerator.NewV7()
+	if err != nil {
+		return "", err
+	}
+	return v7.String(), nil
+}
+
+// NewV1StrNs returns a UUID based on the current timestamp and MAC address.
+func NewV1StrNs() (string, error) {
+	v1, err := DefaultGenerator.NewV1()
+	if err != nil {
+		return "", err
+	}
+	str := v1.String()
+	str = strings.ReplaceAll(str, "-", "")
+	return str, nil
+}
+
+// NewV3StrNs returns a UUID based on the MD5 hash of the namespace UUID and name.
+func NewV3StrNs(ns UUID, name string) string {
+	v3 := DefaultGenerator.NewV3(ns, name)
+	str := v3.String()
+	str = strings.ReplaceAll(str, "-", "")
+	return str
+}
+
+// NewV4StrNs returns a randomly generated UUID.
+func NewV4StrNs() (string, error) {
+	v4, err := DefaultGenerator.NewV4()
+	if err != nil {
+		return "", err
+	}
+	str := v4.String()
+	str = strings.ReplaceAll(str, "-", "")
+	return str, nil
+}
+
+// NewV5StrNs returns a UUID based on SHA-1 hash of the namespace UUID and name.
+func NewV5StrNs(ns UUID, name string) string {
+	v5 := DefaultGenerator.NewV5(ns, name)
+	str := v5.String()
+	str = strings.ReplaceAll(str, "-", "")
+	return str
+}
+
+// NewV6StrNs returns a k-sortable UUID based on a timestamp and 48 bits of
+// pseudorandom data. The timestamp in a V6 UUID is the same as V1, with the bit
+// order being adjusted to allow the UUID to be k-sortable.
+//
+// This is implemented based on revision 03 of the Peabody UUID draft, and may
+// be subject to change pending further revisions. Until the final specification
+// revision is finished, changes required to implement updates to the spec will
+// not be considered a breaking change. They will happen as a minor version
+// releases until the spec is final.
+func NewV6StrNs() (string, error) {
+	v6, err := DefaultGenerator.NewV6()
+	if err != nil {
+		return "", err
+	}
+	str := v6.String()
+	str = strings.ReplaceAll(str, "-", "")
+	return str, nil
+}
+
+// NewV7StrNs returns a k-sortable UUID based on the current millisecond precision
+// UNIX epoch and 74 bits of pseudorandom data. It supports single-node batch generation (multiple UUIDs in the same timestamp) with a Monotonic Random counter.
+//
+// This is implemented based on revision 04 of the Peabody UUID draft, and may
+// be subject to change pending further revisions. Until the final specification
+// revision is finished, changes required to implement updates to the spec will
+// not be considered a breaking change. They will happen as a minor version
+// releases until the spec is final.
+func NewV7StrNs() (string, error) {
+	v7, err := DefaultGenerator.NewV7()
+	if err != nil {
+		return "", err
+	}
+	str := v7.String()
+	str = strings.ReplaceAll(str, "-", "")
+	return str, nil
 }
 
 // Generator provides an interface for generating UUIDs.

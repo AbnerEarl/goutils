@@ -175,20 +175,36 @@ func (db *DB) DeleteSoftByWhere(dataModel interface{}, where string, args []inte
 	return db.Where(where, args...).Delete(dataModel).Error
 }
 
-func (db *DB) RetrieveById(whereModel interface{}) error {
+func (db *DB) RetrieveFirstById(whereModel interface{}) error {
 	return db.First(whereModel).Error
 }
 
-func (db *DB) RetrieveByFind(whereModel interface{}) error {
-	return db.Model(whereModel).Where(whereModel).First(whereModel).Error
+func (db *DB) RetrieveFirstByFind(whereModel interface{}) error {
+	return db.Where(whereModel).First(whereModel).Error
 }
 
-func (db *DB) RetrieveByMap(dataModel interface{}, whereMap map[string]interface{}) error {
-	return db.First(dataModel).First(&whereMap).Error
+func (db *DB) RetrieveFirstByMap(dataModel interface{}, whereMap map[string]interface{}) error {
+	return db.Where(whereMap).First(dataModel).Error
 }
 
-func (db *DB) RetrieveByArgs(dataModel interface{}, where string, args []interface{}) error {
+func (db *DB) RetrieveFirstByArgs(dataModel interface{}, where string, args []interface{}) error {
 	return db.Where(where, args...).First(dataModel).Error
+}
+
+func (db *DB) RetrieveLastById(whereModel interface{}) error {
+	return db.Last(whereModel).Error
+}
+
+func (db *DB) RetrieveLastByFind(whereModel interface{}) error {
+	return db.Where(whereModel).Last(whereModel).Error
+}
+
+func (db *DB) RetrieveLastByMap(dataModel interface{}, whereMap map[string]interface{}) error {
+	return db.Where(whereMap).Last(dataModel).Error
+}
+
+func (db *DB) RetrieveLastByArgs(dataModel interface{}, where string, args []interface{}) error {
+	return db.Where(where, args...).Last(dataModel).Error
 }
 
 func (db *DB) RetrieveCountByArgs(dataModel interface{}, where string, args []interface{}) (int64, error) {
@@ -240,6 +256,47 @@ func (db *DB) RetrieveByWhere(pageSize, pageNo int, dataModel interface{}, order
 	return results.Interface(), count, nil
 }
 
+func (db *DB) RetrieveOrderInByWhere(pageSize, pageNo int, dataModel interface{}, where string, args []interface{}, orderKey string, orderValues []interface{}) (interface{}, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//result, count, err := RetrieveByWhere(0, 0, &m, "id=?", []interface{}{1}, "id", []interface{}{3,2,1})
+	//dataList := result.(*[]*dbs.UpdateModel)
+	//fmt.Println((*data)[0])
+	var count int64 = 0
+	if err := db.Model(dataModel).Where(where, args...).Count(&count).Error; err != nil {
+		return nil, count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(dataModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
+	if err := db.
+		Model(dataModel).
+		Where(where, args...).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return nil, count, err
+	}
+	return results.Interface(), count, nil
+}
+
 func (db *DB) RetrieveByWhereString(pageSize, pageNo int, dataModel interface{}, order, where string, args []interface{}) (string, int64, error) {
 	//use example:
 	//m := dbs.UpdateModel{}
@@ -264,6 +321,50 @@ func (db *DB) RetrieveByWhereString(pageSize, pageNo int, dataModel interface{},
 	}
 	itemSlice := reflect.SliceOf(typ)
 	results := reflect.New(itemSlice)
+	if err := db.
+		Model(dataModel).
+		Where(where, args...).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return "", count, err
+	}
+	bytes, err := json.Marshal(results.Interface())
+	if err != nil {
+		return "", count, err
+	}
+	return string(bytes), count, nil
+}
+
+func (db *DB) RetrieveOrderInByWhereString(pageSize, pageNo int, dataModel interface{}, where string, args []interface{}, orderKey string, orderValues []interface{}) (string, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//result, count, err := RetrieveByWhereString(0, 0, &m, "id=?", []interface{}{1}, "id", []interface{}{3,2,1})
+	//fmt.Println(result)
+	var count int64 = 0
+	if err := db.Model(dataModel).Where(where, args...).Count(&count).Error; err != nil {
+		return "", count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(dataModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
 	if err := db.
 		Model(dataModel).
 		Where(where, args...).
@@ -322,6 +423,51 @@ func (db *DB) RetrieveByWhereBytes(pageSize, pageNo int, dataModel interface{}, 
 	return bytes, count, nil
 }
 
+func (db *DB) RetrieveOrderInByWhereBytes(pageSize, pageNo int, dataModel interface{}, where string, args []interface{}, orderKey string, orderValues []interface{}) ([]byte, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//result, count, err := RetrieveByWhereBytes(0, 0, &m, "id=?", []interface{}{1}, "id", []interface{}{3,2,1})
+	//var dataList []interface{}
+	//json.Unmarshal(result,&dataList)
+	//fmt.Println(dataList)
+	var count int64 = 0
+	if err := db.Model(dataModel).Where(where, args...).Count(&count).Error; err != nil {
+		return nil, count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(dataModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
+	if err := db.
+		Model(dataModel).
+		Where(where, args...).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return nil, count, err
+	}
+	bytes, err := json.Marshal(results.Interface())
+	if err != nil {
+		return nil, count, err
+	}
+	return bytes, count, nil
+}
 func (db *DB) RetrieveByWhereSelect(pageSize, pageNo int, dataModel interface{}, fields []string, order, where string, args []interface{}) (interface{}, int64, error) {
 	//use example:
 	//m := dbs.UpdateModel{}
@@ -359,6 +505,46 @@ func (db *DB) RetrieveByWhereSelect(pageSize, pageNo int, dataModel interface{},
 	return results.Interface(), count, nil
 }
 
+func (db *DB) RetrieveOrderInByWhereSelect(pageSize, pageNo int, dataModel interface{}, fields []string, where string, args []interface{}, orderKey string, orderValues []interface{}) (interface{}, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//result, count, err := RetrieveBySelect(0, 0, &m, []string{"id", "name"}, "id=?", []interface{}{1}, "id", []interface{}{3,2,1})
+	//dataList := result.(*[]*dbs.UpdateModel)
+	//fmt.Println((*dataList)[0])
+	var count int64
+	if err := db.Model(dataModel).Where(where, args...).Count(&count).Error; err != nil {
+		return nil, count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(dataModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
+	if err := db.
+		Select(fields).
+		Where(where, args...).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return nil, count, err
+	}
+	return results.Interface(), count, nil
+}
 func (db *DB) RetrieveByWhereSelectString(pageSize, pageNo int, dataModel interface{}, fields []string, order, where string, args []interface{}) (string, int64, error) {
 	//use example:
 	//m := dbs.UpdateModel{}
@@ -400,6 +586,50 @@ func (db *DB) RetrieveByWhereSelectString(pageSize, pageNo int, dataModel interf
 	return string(bytes), count, nil
 }
 
+func (db *DB) RetrieveOrderInByWhereSelectString(pageSize, pageNo int, dataModel interface{}, fields []string, where string, args []interface{}, orderKey string, orderValues []interface{}) (string, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//result, count, err := RetrieveBySelectString(0, 0, &m, []string{"id", "name"}, "id=?", []interface{}{1}, "id", []interface{}{3,2,1})
+	//fmt.Println(result)
+	var count int64
+	if err := db.Model(dataModel).Where(where, args...).Count(&count).Error; err != nil {
+		return "", count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(dataModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
+	if err := db.
+		Select(fields).
+		Where(where, args...).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return "", count, err
+	}
+
+	bytes, err := json.Marshal(results.Interface())
+	if err != nil {
+		return "", count, err
+	}
+	return string(bytes), count, nil
+}
 func (db *DB) RetrieveByWhereSelectBytes(pageSize, pageNo int, dataModel interface{}, fields []string, order, where string, args []interface{}) ([]byte, int64, error) {
 	//use example:
 	//m := dbs.UpdateModel{}
@@ -426,6 +656,53 @@ func (db *DB) RetrieveByWhereSelectBytes(pageSize, pageNo int, dataModel interfa
 	}
 	itemSlice := reflect.SliceOf(typ)
 	results := reflect.New(itemSlice)
+	if err := db.
+		Select(fields).
+		Where(where, args...).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return nil, count, err
+	}
+
+	bytes, err := json.Marshal(results.Interface())
+	if err != nil {
+		return nil, count, err
+	}
+	return bytes, count, nil
+}
+
+func (db *DB) RetrieveOrderInByWhereSelectBytes(pageSize, pageNo int, dataModel interface{}, fields []string, where string, args []interface{}, orderKey string, orderValues []interface{}) ([]byte, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//result, count, err := RetrieveBySelectBytes(0, 0, &m, []string{"id", "name"}, "id=?", []interface{}{1}, "id", []interface{}{3,2,1})
+	//var dataList []interface{}
+	//json.Unmarshal(result,&dataList)
+	//fmt.Println(dataList)
+	var count int64
+	if err := db.Model(dataModel).Where(where, args...).Count(&count).Error; err != nil {
+		return nil, count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(dataModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
 	if err := db.
 		Select(fields).
 		Where(where, args...).
@@ -566,6 +843,48 @@ func (db *DB) RetrieveByModel(pageSize, pageNo int, whereModel interface{}, orde
 	return results.Interface(), count, nil
 }
 
+func (db *DB) RetrieveOrderInByModel(pageSize, pageNo int, whereModel interface{}, orderKey string, orderValues []interface{}) (interface{}, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//m.Id = 1
+	//result, count, err := RetrieveByModel(0, 0, &m, "id", []interface{}{3,2,1})
+	//dataList := result.(*[]*dbs.UpdateModel)
+	//fmt.Println((*data)[0])
+	var count int64 = 0
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
+		return nil, count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(whereModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
+	if err := db.
+		Model(whereModel).
+		Where(whereModel).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return nil, count, err
+	}
+	return results.Interface(), count, nil
+}
+
 func (db *DB) RetrieveByModelString(pageSize, pageNo int, whereModel interface{}, order string) (string, int64, error) {
 	//use example:
 	//m := dbs.UpdateModel{}
@@ -591,6 +910,51 @@ func (db *DB) RetrieveByModelString(pageSize, pageNo int, whereModel interface{}
 	}
 	itemSlice := reflect.SliceOf(typ)
 	results := reflect.New(itemSlice)
+	if err := db.
+		Model(whereModel).
+		Where(whereModel).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return "", count, err
+	}
+	bytes, err := json.Marshal(results.Interface())
+	if err != nil {
+		return "", count, err
+	}
+	return string(bytes), count, nil
+}
+
+func (db *DB) RetrieveOrderInByModelString(pageSize, pageNo int, whereModel interface{}, orderKey string, orderValues []interface{}) (string, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//m.Id = 1
+	//result, count, err := RetrieveByModelString(0, 0, &m, "id", []interface{}{3,2,1})
+	//fmt.Println(result)
+	var count int64 = 0
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
+		return "", count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(whereModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
 	if err := db.
 		Model(whereModel).
 		Where(whereModel).
@@ -650,6 +1014,52 @@ func (db *DB) RetrieveByModelBytes(pageSize, pageNo int, whereModel interface{},
 	return bytes, count, nil
 }
 
+func (db *DB) RetrieveOrderInByModelBytes(pageSize, pageNo int, whereModel interface{}, orderKey string, orderValues []interface{}) ([]byte, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//m.Id = 1
+	//result, count, err := RetrieveByModelBytes(0, 0, &m, "id", []interface{}{3,2,1})
+	//var dataList []interface{}
+	//json.Unmarshal(result,&dataList)
+	//fmt.Println(dataList)
+	var count int64 = 0
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
+		return nil, count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(whereModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
+	if err := db.
+		Model(whereModel).
+		Where(whereModel).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return nil, count, err
+	}
+	bytes, err := json.Marshal(results.Interface())
+	if err != nil {
+		return nil, count, err
+	}
+	return bytes, count, nil
+}
 func (db *DB) RetrieveByModelSelect(pageSize, pageNo int, whereModel interface{}, fields []string, order string) (interface{}, int64, error) {
 	//use example:
 	//m := dbs.UpdateModel{}
@@ -676,6 +1086,49 @@ func (db *DB) RetrieveByModelSelect(pageSize, pageNo int, whereModel interface{}
 	}
 	itemSlice := reflect.SliceOf(typ)
 	results := reflect.New(itemSlice)
+	if err := db.
+		Model(whereModel).
+		Where(whereModel).
+		Select(fields).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return nil, count, err
+	}
+	return results.Interface(), count, nil
+}
+
+func (db *DB) RetrieveOrderInByModelSelect(pageSize, pageNo int, whereModel interface{}, fields []string, orderKey string, orderValues []interface{}) (interface{}, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//m.Id = 1
+	//result, count, err := RetrieveByModelSelect(0, 0, &m, []string{"id", "name"}, "id", []interface{}{3,2,1})
+	//dataList := result.(*[]*dbs.UpdateModel)
+	//fmt.Println((*dataList)[0])
+	var count int64
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
+		return nil, count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(whereModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
 	if err := db.
 		Model(whereModel).
 		Where(whereModel).
@@ -732,6 +1185,53 @@ func (db *DB) RetrieveByModelSelectString(pageSize, pageNo int, whereModel inter
 	return string(bytes), count, nil
 }
 
+func (db *DB) RetrieveOrderInByModelSelectString(pageSize, pageNo int, whereModel interface{}, fields []string, orderKey string, orderValues []interface{}) (string, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//m.Id = 1
+	//result, count, err := RetrieveByModelSelectString(0, 0, &m, []string{"id", "name"}, "id", []interface{}{3,2,1})
+	//fmt.Println(result)
+	var count int64
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
+		return "", count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(whereModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
+	if err := db.
+		Model(whereModel).
+		Where(whereModel).
+		Select(fields).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return "", count, err
+	}
+
+	bytes, err := json.Marshal(results.Interface())
+	if err != nil {
+		return "", count, err
+	}
+	return string(bytes), count, nil
+}
+
 func (db *DB) RetrieveByModelSelectBytes(pageSize, pageNo int, whereModel interface{}, fields []string, order string) ([]byte, int64, error) {
 	//use example:
 	//m := dbs.UpdateModel{}
@@ -759,6 +1259,55 @@ func (db *DB) RetrieveByModelSelectBytes(pageSize, pageNo int, whereModel interf
 	}
 	itemSlice := reflect.SliceOf(typ)
 	results := reflect.New(itemSlice)
+	if err := db.
+		Model(whereModel).
+		Where(whereModel).
+		Select(fields).
+		Offset(offset).
+		Limit(pageSize).
+		Order(order).
+		Find(results.Interface()).Error; err != nil {
+		return nil, count, err
+	}
+
+	bytes, err := json.Marshal(results.Interface())
+	if err != nil {
+		return nil, count, err
+	}
+	return bytes, count, nil
+}
+
+func (db *DB) RetrieveOrderInByModelSelectBytes(pageSize, pageNo int, whereModel interface{}, fields []string, orderKey string, orderValues []interface{}) ([]byte, int64, error) {
+	//use example:
+	//m := dbs.UpdateModel{}
+	//m.Id = 1
+	//result, count, err := RetrieveByModelSelectBytes(0, 0, &m, []string{"id", "name"}, "id", []interface{}{3,2,1})
+	//var dataList []interface{}
+	//json.Unmarshal(result,&dataList)
+	//fmt.Println(dataList)
+	var count int64
+	if err := db.Model(whereModel).Where(whereModel).Count(&count).Error; err != nil {
+		return nil, count, err
+	}
+	if pageSize == 0 {
+		pageSize = DefaultLimit
+	} else if pageSize > DefaultMaxLimit {
+		pageSize = DefaultMaxLimit
+	}
+	if pageNo == 0 {
+		pageNo = 1
+	}
+	offset := (pageNo - 1) * pageSize
+	typ := reflect.TypeOf(whereModel)
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	itemSlice := reflect.SliceOf(typ)
+	results := reflect.New(itemSlice)
+	order := ""
+	if len(orderValues) > 0 {
+		order = fmt.Sprintf("FIELD(%s,%s)", orderKey, utils.List2String(orderValues))
+	}
 	if err := db.
 		Model(whereModel).
 		Where(whereModel).

@@ -22,27 +22,27 @@ if [ -z $fileName ]; then
 fi
 
 files=($(ls $modelPath | grep -v init.go))
-mkdir -p "$packageName"
+mkdir -p $(dirname "$fileName")
 echo "package $packageName
 
-var Comment = []map[string]interface{}{" >$packageName/$fileName
+var Comment = []map[string]interface{}{" >$fileName
 for i in $(seq ${#files[@]}); do
   names=($(cat model/${files[i - 1]} | grep -e "comment:" -e "BaseModel$" | awk -F'json:' '{print $packageName}' | awk -F '\"' '{print $packageName}' | sed 's/^$/###/g'))
   comments=($(cat model/${files[i - 1]} | grep -e "comment:" -e "BaseModel$" | awk -F'comment:' '{print $packageName}' | awk -F "\'" '{print $packageName}' | sed 's/^$/###/g'))
   if [ ${#names[@]} -lt 1 ]; then
     continue
   fi
-  echo "	map[string]interface{}{" >>$packageName/$fileName
+  echo "	map[string]interface{}{" >>$fileName
   for j in $(seq ${#names[@]}); do
     if [ ${names[j - 1]} == "###" ]; then
-      echo "	}," >>$packageName/$fileName
-      echo "	map[string]interface{}{" >>$packageName/$fileName
+      echo "	}," >>$fileName
+      echo "	map[string]interface{}{" >>$fileName
       continue
     fi
-    echo "		\"${names[j - 1]}\": \"${comments[j - 1]}\"," >>$packageName/$fileName
+    echo "		\"${names[j - 1]}\": \"${comments[j - 1]}\"," >>$fileName
   done
-  echo "	}," >>$packageName/$fileName
+  echo "	}," >>$fileName
 done
 
 echo "}
-" >>$packageName/$fileName
+" >>$fileName

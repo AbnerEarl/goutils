@@ -41,7 +41,7 @@ func OpenDBMySQLCluster(dsns []string, dryRun bool, maxConn, idleConn uint64) *D
 
 	if number > 1 {
 		if number < 3 {
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < number; i++ {
 				sources = append(sources, mysql.Open(dsns[i]))
 			}
@@ -54,11 +54,11 @@ func OpenDBMySQLCluster(dsns []string, dryRun bool, maxConn, idleConn uint64) *D
 			}))
 		} else {
 			n := number/2 + 1
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < n; i++ {
 				sources = append(sources, mysql.Open(dsns[i]))
 			}
-			replicas := []gorm.Dialector{}
+			var replicas []gorm.Dialector
 			for i := n; i < number; i++ {
 				replicas = append(replicas, mysql.Open(dsns[i]))
 			}
@@ -110,7 +110,7 @@ func OpenDBPostgreSQLCluster(dsns []string, dryRun bool, maxConn, idleConn uint6
 
 	if number > 1 {
 		if number < 3 {
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < number; i++ {
 				sources = append(sources, postgres.Open(dsns[i]))
 			}
@@ -123,11 +123,11 @@ func OpenDBPostgreSQLCluster(dsns []string, dryRun bool, maxConn, idleConn uint6
 			}))
 		} else {
 			n := number/2 + 1
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < n; i++ {
 				sources = append(sources, postgres.Open(dsns[i]))
 			}
-			replicas := []gorm.Dialector{}
+			var replicas []gorm.Dialector
 			for i := n; i < number; i++ {
 				replicas = append(replicas, postgres.Open(dsns[i]))
 			}
@@ -172,7 +172,7 @@ func OpenDBSQLiteCluster(fileNames []string, dryRun bool, maxConn, idleConn uint
 
 	if number > 1 {
 		if number < 3 {
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < number; i++ {
 				sources = append(sources, sqlite.Open(fileNames[i]))
 			}
@@ -185,11 +185,11 @@ func OpenDBSQLiteCluster(fileNames []string, dryRun bool, maxConn, idleConn uint
 			}))
 		} else {
 			n := number/2 + 1
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < n; i++ {
 				sources = append(sources, sqlite.Open(fileNames[i]))
 			}
-			replicas := []gorm.Dialector{}
+			var replicas []gorm.Dialector
 			for i := n; i < number; i++ {
 				replicas = append(replicas, sqlite.Open(fileNames[i]))
 			}
@@ -241,7 +241,7 @@ func OpenDBSQLServerCluster(dsns []string, dryRun bool, maxConn, idleConn uint64
 
 	if number > 1 {
 		if number < 3 {
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < number; i++ {
 				sources = append(sources, sqlserver.Open(dsns[i]))
 			}
@@ -254,11 +254,11 @@ func OpenDBSQLServerCluster(dsns []string, dryRun bool, maxConn, idleConn uint64
 			}))
 		} else {
 			n := number/2 + 1
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < n; i++ {
 				sources = append(sources, sqlserver.Open(dsns[i]))
 			}
-			replicas := []gorm.Dialector{}
+			var replicas []gorm.Dialector
 			for i := n; i < number; i++ {
 				replicas = append(replicas, sqlserver.Open(dsns[i]))
 			}
@@ -310,7 +310,7 @@ func OpenDBTiDBCluster(dsns []string, dryRun bool, maxConn, idleConn uint64) *DB
 
 	if number > 1 {
 		if number < 3 {
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < number; i++ {
 				sources = append(sources, mysql.Open(dsns[i]))
 			}
@@ -323,11 +323,11 @@ func OpenDBTiDBCluster(dsns []string, dryRun bool, maxConn, idleConn uint64) *DB
 			}))
 		} else {
 			n := number/2 + 1
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < n; i++ {
 				sources = append(sources, mysql.Open(dsns[i]))
 			}
-			replicas := []gorm.Dialector{}
+			var replicas []gorm.Dialector
 			for i := n; i < number; i++ {
 				replicas = append(replicas, mysql.Open(dsns[i]))
 			}
@@ -379,7 +379,7 @@ func OpenDBClickhouseCluster(dsns []string, dryRun bool, maxConn, idleConn uint6
 
 	if number > 1 {
 		if number < 3 {
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < number; i++ {
 				sources = append(sources, clickhouse.Open(dsns[i]))
 			}
@@ -392,11 +392,11 @@ func OpenDBClickhouseCluster(dsns []string, dryRun bool, maxConn, idleConn uint6
 			}))
 		} else {
 			n := number/2 + 1
-			sources := []gorm.Dialector{}
+			var sources []gorm.Dialector
 			for i := 1; i < n; i++ {
 				sources = append(sources, clickhouse.Open(dsns[i]))
 			}
-			replicas := []gorm.Dialector{}
+			var replicas []gorm.Dialector
 			for i := n; i < number; i++ {
 				replicas = append(replicas, clickhouse.Open(dsns[i]))
 			}

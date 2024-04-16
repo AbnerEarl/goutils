@@ -6,16 +6,98 @@ import (
 	"strings"
 )
 
-func RemoveDuplicateElement(s []interface{}) []interface{} {
-	result := make([]interface{}, 0, len(s))
+func RemoveDuplicateElement(slice []interface{}) []interface{} {
+	result := make([]interface{}, 0, len(slice))
 	temp := map[string]struct{}{}
-	for _, item := range s {
+	for _, item := range slice {
 		bytes, _ := json.Marshal(item)
 		key := string(bytes)
 		if _, ok := temp[key]; !ok {
 			temp[key] = struct{}{}
 			result = append(result, item)
 		}
+	}
+	return result
+}
+
+func List2String(slice []interface{}) string {
+	result := make([]string, 0, len(slice))
+	for _, item := range slice {
+		bytes, _ := json.Marshal(item)
+		result = append(result, string(bytes))
+	}
+	return strings.Join(result, ",")
+}
+
+func List2Strings(slice []interface{}) []string {
+	result := make([]string, 0, len(slice))
+	for _, item := range slice {
+		bytes, _ := json.Marshal(item)
+		result = append(result, string(bytes))
+	}
+	return result
+}
+
+func Order(keys []interface{}, key string, objs []interface{}) []interface{} {
+	objMap := map[string]interface{}{}
+	for _, obj := range objs {
+		om := map[string]interface{}{}
+		bytes, _ := json.Marshal(obj)
+		json.Unmarshal(bytes, &om)
+		bys, _ := json.Marshal(om[key])
+		objMap[string(bys)] = obj
+	}
+	var keyList []string
+	for _, k := range keys {
+		bytes, _ := json.Marshal(k)
+		keyList = append(keyList, string(bytes))
+	}
+	var result []interface{}
+	for _, k := range keyList {
+		result = append(result, objMap[k])
+	}
+	return result
+}
+
+func OrderByte(keys []interface{}, key string, objs []interface{}) []byte {
+	objMap := map[string]interface{}{}
+	for _, obj := range objs {
+		om := map[string]interface{}{}
+		bytes, _ := json.Marshal(obj)
+		json.Unmarshal(bytes, &om)
+		bys, _ := json.Marshal(om[key])
+		objMap[string(bys)] = obj
+	}
+	var keyList []string
+	for _, k := range keys {
+		bytes, _ := json.Marshal(k)
+		keyList = append(keyList, string(bytes))
+	}
+	var result []interface{}
+	for _, k := range keyList {
+		result = append(result, objMap[k])
+	}
+	bytes, _ := json.Marshal(result)
+	return bytes
+}
+
+func OrderStruct(keys []interface{}, key string, objs []struct{}) []struct{} {
+	objMap := map[string]struct{}{}
+	for _, obj := range objs {
+		om := map[string]interface{}{}
+		bytes, _ := json.Marshal(obj)
+		json.Unmarshal(bytes, &om)
+		bys, _ := json.Marshal(om[key])
+		objMap[string(bys)] = obj
+	}
+	var keyList []string
+	for _, k := range keys {
+		bytes, _ := json.Marshal(k)
+		keyList = append(keyList, string(bytes))
+	}
+	var result []struct{}
+	for _, k := range keyList {
+		result = append(result, objMap[k])
 	}
 	return result
 }

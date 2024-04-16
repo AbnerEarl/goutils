@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+type H gin.H
+
 type Context struct {
 	*gin.Context
 }
@@ -953,7 +955,7 @@ func (s *Server) ANY(relativePath string, handlers ...func(c *Context)) gin.IRou
 	return s.Engine.Any(relativePath, sHandlers...)
 }
 
-func (s *Server) NoRoute(relativePath string, handlers ...func(c *Context)) {
+func (s *Server) NoRoute(handlers ...func(c *Context)) {
 	//ANY 拓展请求（根）
 	sHandlers := make([]gin.HandlerFunc, 0)
 	for _, handle := range handlers {

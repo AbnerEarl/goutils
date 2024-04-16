@@ -219,7 +219,7 @@ func (rsc *RedisCli) RdbBRPop(waitTimeSecond uint64, keys ...string) ([]string, 
 }
 
 func (rsc *RedisCli) RdbZAdd(key string, members []map[string]float64) (int64, error) {
-	els := []*redis.Z{}
+	var els []*redis.Z
 	for _, m := range members {
 		for k, v := range m {
 			els = append(els, &redis.Z{

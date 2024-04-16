@@ -33,7 +33,7 @@ func (c *UpdateModel) CollectionName() string {
 
 func InitDefaultData(basePath string) {
 	up := UpdateModel{}
-	fileList := files.GetPathBySuffix(basePath, ".sql")
+	fileList := files.GetFilesBySuffix(basePath, ".sql")
 	recordList := make([]*UpdateModel, 0)
 	err := FindMany(DefaultMaxLimit, 0, up.CollectionName(), nil, nil, &recordList, nil)
 	if err != nil {
