@@ -25,18 +25,26 @@ files=($(ls $modelPath | grep -v init.go))
 mkdir -p $(dirname "$fileName")
 echo "package $packageName
 
-var Comment = []map[string]interface{}{" >$fileName
+var Comment = map[string]map[string]interface{}{" >$fileName
 for i in $(seq ${#files[@]}); do
-  names=($(cat model/${files[i - 1]} | grep -e "comment:" -e "BaseModel$" | awk -F'json:' '{print $packageName}' | awk -F '\"' '{print $packageName}' | sed 's/^$/###/g'))
-  comments=($(cat model/${files[i - 1]} | grep -e "comment:" -e "BaseModel$" | awk -F'comment:' '{print $packageName}' | awk -F "\'" '{print $packageName}' | sed 's/^$/###/g'))
+  names=($(cat model/${files[i - 1]} | grep -e "comment:" -e "BaseModel$" -A1 | grep "comment:" -B1 | awk -F'json:' '{print $2}' | awk -F '\"' '{print $2}' | sed 's/^$/###/g'))
+  comments=($(cat model/${files[i - 1]} | grep -e "comment:" -e "BaseModel$" -A1 | grep "comment:" -B1 | awk -F'comment:' '{print $2}' | awk -F "\'" '{print $2}' | sed 's/^$/###/g'))
   if [ ${#names[@]} -lt 1 ]; then
     continue
   fi
-  echo "	map[string]interface{}{" >>$fileName
+  modelNames=($(cat model/${files[i - 1]} | grep -e "comment:" -e "BaseModel$" | grep -e "comment:" B2 | grep " struct " | awk '{print $2}' ))
+  k=0
+  tableName=$(cat model/${files[i - 1]} | grep -e "${modelNames[$k]}.*TableName" -A2 | grep "return " | awk '{print $NF}')
+  echo "	${tableName}: map[string]interface{}{" >>$fileName
   for j in $(seq ${#names[@]}); do
-    if [ ${names[j - 1]} == "###" ]; then
+    if [ $j -gt 0 ] && [ ${names[j - 1]} == "###" ] && [ ${names[j]} == "###" ]; then
+        continue
+    fi
+    if [ ${names[j - 1]} == "###" ] && [ $j -gt 1 ]; then
       echo "	}," >>$fileName
-      echo "	map[string]interface{}{" >>$fileName
+      let k++
+      tableName=$(cat model/${files[i - 1]} | grep -e "${modelNames[$k]}.*TableName" -A2 | grep "return " | awk '{print $NF}')
+      echo "	${tableName}: map[string]interface{}{" >>$fileName
       continue
     fi
     echo "		\"${names[j - 1]}\": \"${comments[j - 1]}\"," >>$fileName

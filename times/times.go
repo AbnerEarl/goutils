@@ -30,7 +30,7 @@ func SubMinuteByString(t string) (float64, error) {
 	return time.Now().Sub(timeObj).Minutes(), nil
 }
 
-func String2Time(s string) (time.Time, error) {
+func String2Time(s string, tmFmt string) (time.Time, error) {
 	timeObj, err := time.ParseInLocation(TmFmtWithS1, s, Locate)
 	if err != nil {
 		return time.Time{}, err
@@ -38,6 +38,21 @@ func String2Time(s string) (time.Time, error) {
 	return timeObj, nil
 }
 
+func String2TimeS(s string) (time.Time, error) {
+	timeObj, err := time.ParseInLocation(TmFmtWithS1, s, Locate)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return timeObj, nil
+}
+
+func String2TimeD(s string) (time.Time, error) {
+	timeObj, err := time.ParseInLocation(TmFmtWithD1, s, Locate)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return timeObj, nil
+}
 func FormatSubTime(t string) string {
 	result := strings.Replace(t, "h", "时", 1)
 	result = strings.Replace(result, "m", "分钟", 1)

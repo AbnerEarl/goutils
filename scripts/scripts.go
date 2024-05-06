@@ -22,3 +22,10 @@ func GenDbComment(modelDirPath, genPackageName, genFileName string) error {
 	op := fmt.Sprintf("bash %s %s %s %s", shellPath, modelDirPath, genPackageName, filePath)
 	return cmdc.Bash(op)
 }
+
+func RunTestReport(moduleName string) error {
+	shellPath := files.GetAbPathByCaller() + "scripts/test.sh"
+	shellPath = strings.ReplaceAll(shellPath, "!", "\\!")
+	op := fmt.Sprintf("bash %s %s", shellPath, moduleName)
+	return cmdc.Bash(op)
+}
