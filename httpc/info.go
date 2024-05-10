@@ -11,6 +11,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"net"
 	"net/http"
 	"regexp"
 	"sort"
@@ -137,6 +138,10 @@ func GetBrowserName(userAgent string) string {
 
 // GenerateFingerprint 从请求头中提取信息生成指纹
 func GenerateFingerprint(r *http.Request) string {
+	clientIP, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		clientIP = r.RemoteAddr
+	}
 	// 选择一些请求头字段作为浏览器指纹的基础
 	headers := []string{
 		r.Header.Get("User-Agent"),
@@ -145,6 +150,42 @@ func GenerateFingerprint(r *http.Request) string {
 		r.Header.Get("Accept-Encoding"),
 		r.Header.Get("DNT"),
 		r.Header.Get("Connection"),
+		//r.Host,
+		//r.Proto,
+		clientIP,
+	}
+
+	// 将 headers 排序，以保证一致性
+	sort.Strings(headers)
+
+	// 将排序后的 headers 拼接为一个单一的字符串
+	fingerprint := strings.Join(headers, "|")
+
+	// 使用 sha256 哈希生成一个固定长度的指纹
+	hash := sha256.Sum256([]byte(fingerprint))
+
+	// 将哈希值编码为 base64 字符串
+	return base64.StdEncoding.EncodeToString(hash[:])
+}
+
+// GenerateFingerprintKey 从请求头中提取信息生成指纹，并加入唯一标识
+func GenerateFingerprintKey(r *http.Request, key string) string {
+	clientIP, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		clientIP = r.RemoteAddr
+	}
+	// 选择一些请求头字段作为浏览器指纹的基础
+	headers := []string{
+		r.Header.Get("User-Agent"),
+		r.Header.Get("Accept"),
+		r.Header.Get("Accept-Language"),
+		r.Header.Get("Accept-Encoding"),
+		r.Header.Get("DNT"),
+		r.Header.Get("Connection"),
+		//r.Host,
+		//r.Proto,
+		clientIP,
+		key,
 	}
 
 	// 将 headers 排序，以保证一致性

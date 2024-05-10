@@ -3,28 +3,21 @@ package gins
 import "fmt"
 
 var (
-	OK              = &Errno{Code: 0, Message: "OK"}
-	InternalError   = &Errno{Code: 10001, Message: "Internal server error"}
-	ErrTokenInvalid = &Errno{Code: 20001, Message: "The token was invalid."}
-	ErrParam        = &Errno{Code: 30001, Message: "The parameter is error."}
-	ErrPageParam    = &Errno{Code: 30002, Message: "The parameter of page_no or page_size is error"}
+	OK              = &Errno{Code: 0, Message: "success", Tips: "成功"}
+	InternalError   = &Errno{Code: 10001, Message: "Internal server error", Tips: "服务器内部错误"}
+	ErrTokenInvalid = &Errno{Code: 20001, Message: "The token was invalid", Tips: "Token无效"}
+	ErrParam        = &Errno{Code: 30001, Message: "The parameter is error", Tips: "参数错误"}
+	ErrPageParam    = &Errno{Code: 30002, Message: "The parameter of page_no or page_size is error", Tips: "分页参数错误"}
 )
 
 type Response struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-}
-
-type Message struct {
-	Style int         `json:"style"`
-	Data  interface{} `json:"data"`
+	*Errno
+	Data interface{} `json:"data"`
 }
 
 type ThirdResponse struct {
-	Code    int                    `json:"code"`
-	Message string                 `json:"message"`
-	Data    map[string]interface{} `json:"data"`
+	*Errno
+	Data map[string]interface{} `json:"data"`
 }
 
 type LogData struct {
@@ -35,51 +28,46 @@ type LogData struct {
 }
 
 type Errno struct {
-	Code    int
-	Message string
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Tips    string `json:"tips"`
+	Err     error  `json:"err"`
 }
 
-func (err Errno) Error() string {
-	return err.Message
-}
-
-// Err represents an error
 type Err struct {
 	Code    int
 	Message string
 	Err     error
 }
 
-func NewErr(errno *Errno, err error) *Err {
-	return &Err{Code: errno.Code, Message: errno.Message, Err: err}
+func NewErr(errno *Errno, err error) *Errno {
+	return &Errno{Code: errno.Code, Message: errno.Message, Tips: errno.Tips, Err: err}
 }
 
-func (err *Err) Add(message string) error {
+func (err *Errno) Add(message string) {
 	err.Message += " " + message
-	return err
 }
 
-func (err *Err) AddAny(format string, args ...interface{}) error {
+func (err *Errno) AddAny(format string, args ...interface{}) {
 	err.Message += " " + fmt.Sprintf(format, args...)
-	return err
 }
 
-func (err *Err) Error() string {
-	return fmt.Sprintf("Err - code: %d, message: %s, error: %s", err.Code, err.Message, err.Err)
+func (err *Errno) Error() string {
+	return fmt.Sprintf("Err - code: %d, message: %s, tips:%s, err: %s", err.Code, err.Message, err.Tips, err.Err.Error())
 }
 
-func DecodeErr(err error) (int, string) {
+func DecodeErr(err error) *Errno {
 	if err == nil {
-		return OK.Code, OK.Message
+		return OK
 	}
 
 	switch typed := err.(type) {
-	case *Err:
-		return typed.Code, typed.Message
 	case *Errno:
-		return typed.Code, typed.Message
+		return typed
 	default:
 	}
-
-	return InternalError.Code, err.Error()
+	e := new(Errno)
+	*e = *InternalError
+	e.Err = err
+	return e
 }

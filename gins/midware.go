@@ -22,20 +22,16 @@ var WhitelistAPI = map[string]bool{
 var JwtSecret = "ABCDEFabcdef123456"
 
 func SendResponse(c *Context, err error, data interface{}) {
-	code, message := DecodeErr(err)
 	c.JSON(http.StatusOK, Response{
-		Code:    code,
-		Message: message,
-		Data:    data,
+		Errno: DecodeErr(err),
+		Data:  data,
 	})
 }
 
 func sendResponse(c *Context, err error, data interface{}) {
-	code, message := DecodeErr(err)
 	c.JSON(http.StatusOK, Response{
-		Code:    code,
-		Message: message,
-		Data:    data,
+		Errno: DecodeErr(err),
+		Data:  data,
 	})
 }
 
