@@ -5,7 +5,6 @@ import (
 	"github.com/AbnerEarl/goutils/utils"
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
-	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
@@ -54,11 +53,7 @@ func (c *Context) ArgsObject(key string) interface{} {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -87,11 +82,7 @@ func (c *Context) ArgsInt64(key string) int64 {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -110,11 +101,7 @@ func (c *Context) ArgsInt64Default(key string, val int64) int64 {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -127,11 +114,7 @@ func (c *Context) ArgsString(key string) string {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -182,11 +165,7 @@ func (c *Context) ArgsInt64Array(key string) []int64 {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -228,11 +207,7 @@ func (c *Context) ArgsInt64ArrayDefault(key string, val []int64) []int64 {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -274,11 +249,7 @@ func (c *Context) ArgsUint64Array(key string) []uint64 {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -320,11 +291,7 @@ func (c *Context) ArgsUint64ArrayDefault(key string, val []uint64) []uint64 {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -365,11 +332,7 @@ func (c *Context) ArgsUintArray(key string) []uint {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -410,11 +373,7 @@ func (c *Context) ArgsUintArrayDefault(key string, val []uint) []uint {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -455,11 +414,7 @@ func (c *Context) ArgsIntArray(key string) []int {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -500,11 +455,7 @@ func (c *Context) ArgsIntArrayDefault(key string, val []int) []int {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -556,11 +507,7 @@ func (c *Context) ArgsFloat64Array(key string) []float64 {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -600,11 +547,7 @@ func (c *Context) ArgsFloat64ArrayDefault(key string, val []float64) []float64 {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -629,11 +572,7 @@ func (c *Context) ArgsStringArray(key string) []string {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -673,11 +612,7 @@ func (c *Context) ArgsInt(key string) int {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -696,11 +631,7 @@ func (c *Context) ArgsIntDefault(key string, val int) int {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -719,11 +650,7 @@ func (c *Context) ArgsUint64(key string) uint64 {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -742,11 +669,7 @@ func (c *Context) ArgsUint64Default(key string, val uint64) uint64 {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -764,11 +687,7 @@ func (c *Context) ArgsFloat64(key string) float64 {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -786,11 +705,7 @@ func (c *Context) ArgsFloat64Default(key string, val float64) float64 {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -809,11 +724,7 @@ func (c *Context) ArgsUint(key string) uint {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -832,11 +743,7 @@ func (c *Context) ArgsUintDefault(key string, val uint) uint {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -854,11 +761,7 @@ func (c *Context) ArgsBool(key string) bool {
 		err = fmt.Errorf("the param '%s' is not exsit", key)
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 
@@ -876,11 +779,7 @@ func (c *Context) ArgsBoolDefault(key string, val bool) bool {
 		return val
 	}
 	c.Abort()
-	c.JSON(http.StatusOK, gin.H{
-		"code":    1,
-		"message": "参数解析异常",
-		"data":    err,
-	})
+	ParamResponse(c, err, key, data)
 	panic(err)
 }
 

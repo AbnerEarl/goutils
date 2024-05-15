@@ -28,10 +28,14 @@ func SendResponse(c *Context, err error, data interface{}) {
 	})
 }
 
-func sendResponse(c *Context, err error, data interface{}) {
+func ParamResponse(c *Context, err error, key string, data interface{}) {
+	e := new(Errno)
+	*e = *ParamError
+	e.Err = err
+	e.Message += fmt.Sprintf(", parameter name: %s, parameter value: %s", key, fmt.Sprint(data))
+	e.Tips += fmt.Sprintf("，参数名：%s", key)
 	c.JSON(http.StatusOK, Response{
 		Errno: DecodeErr(err),
-		Data:  data,
 	})
 }
 
@@ -42,7 +46,7 @@ func Validate(checkToken func(token, apiPath string, c *Context) (string, error)
 			err := jwtVerify(c, checkToken)
 			if err != nil {
 				c.Abort()
-				sendResponse(c, err, nil)
+				SendResponse(c, err, nil)
 				return
 			}
 		}
@@ -118,7 +122,7 @@ func Args(checkParamMethods ...func(c *Context) (bool, error)) HandlerFunc {
 			ck, err := method(c)
 			if !ck && err != nil {
 				c.Abort()
-				sendResponse(c, err, nil)
+				SendResponse(c, err, nil)
 				return
 			}
 		}

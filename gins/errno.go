@@ -4,10 +4,10 @@ import "fmt"
 
 var (
 	OK              = &Errno{Code: 0, Message: "success", Tips: "成功"}
-	InternalError   = &Errno{Code: 10001, Message: "Internal server error", Tips: "服务器内部错误"}
-	ErrTokenInvalid = &Errno{Code: 20001, Message: "The token was invalid", Tips: "Token无效"}
-	ErrParam        = &Errno{Code: 30001, Message: "The parameter is error", Tips: "参数错误"}
-	ErrPageParam    = &Errno{Code: 30002, Message: "The parameter of page_no or page_size is error", Tips: "分页参数错误"}
+	ParamError      = &Errno{Code: 1, Message: "request parameter error", Tips: "请求参数错误"}
+	InternalError   = &Errno{Code: 10001, Message: "internal server error", Tips: "服务器内部错误"}
+	ErrTokenInvalid = &Errno{Code: 20001, Message: "the token was invalid", Tips: "Token无效"}
+	ErrPageParam    = &Errno{Code: 30001, Message: "the parameter of page_no or page_size is error", Tips: "分页参数错误"}
 )
 
 type Response struct {
