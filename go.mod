@@ -15,6 +15,7 @@ require (
 	github.com/google/go-github/v50 v50.2.0
 	github.com/mojocn/base64Captcha v1.3.5
 	github.com/robertkrimen/otto v0.4.0
+	github.com/smartwalle/alipay/v3 v3.2.20
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/xdg-go/scram v1.1.2
 	go.mongodb.org/mongo-driver v1.11.6
@@ -97,6 +98,9 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
+	github.com/smartwalle/ncrypto v1.0.4 // indirect
+	github.com/smartwalle/ngx v1.0.9 // indirect
+	github.com/smartwalle/nsign v1.0.9 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
