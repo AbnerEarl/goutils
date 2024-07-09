@@ -1,7 +1,6 @@
 package gins
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -34,22 +33,11 @@ type Errno struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 	Tips    string `json:"tips"`
-	Err     error  `json:"err"`
+	Err     string `json:"err"`
 }
 
 func NewErr(errno *Errno, err error) *Errno {
-	return &Errno{Code: errno.Code, Message: errno.Message, Tips: errno.Tips, Err: err}
-}
-
-func (err *Errno) MarshalJSON() ([]byte, error) {
-	type Alias Errno
-	return json.Marshal(&struct {
-		Alias
-		Err string `json:"err"`
-	}{
-		Alias: (Alias)(*err),
-		Err:   err.Err.Error(),
-	})
+	return &Errno{Code: errno.Code, Message: errno.Message, Tips: errno.Tips, Err: err.Error()}
 }
 
 func (err *Errno) Add(message string) {
@@ -61,7 +49,7 @@ func (err *Errno) AddAny(format string, args ...interface{}) {
 }
 
 func (err *Errno) Error() string {
-	return fmt.Sprintf("Err - code: %d, message: %s, tips:%s, err: %s", err.Code, err.Message, err.Tips, err.Err.Error())
+	return fmt.Sprintf("Err - code: %d, message: %s, tips:%s, err: %s", err.Code, err.Message, err.Tips, err.Err)
 }
 
 func DecodeErr(err error) *Errno {
@@ -76,6 +64,6 @@ func DecodeErr(err error) *Errno {
 	}
 	e := new(Errno)
 	*e = *InternalError
-	e.Err = err
+	e.Err = err.Error()
 	return e
 }
