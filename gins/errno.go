@@ -1,6 +1,9 @@
 package gins
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 var (
 	OK              = &Errno{Code: 0, Message: "success", Tips: "成功"}
@@ -34,14 +37,19 @@ type Errno struct {
 	Err     error  `json:"err"`
 }
 
-type Err struct {
-	Code    int
-	Message string
-	Err     error
-}
-
 func NewErr(errno *Errno, err error) *Errno {
 	return &Errno{Code: errno.Code, Message: errno.Message, Tips: errno.Tips, Err: err}
+}
+
+func (err *Errno) MarshalJSON() ([]byte, error) {
+	type Alias Errno
+	return json.Marshal(&struct {
+		Alias
+		Err string `json:"err"`
+	}{
+		Alias: (Alias)(*err),
+		Err:   err.Err.Error(),
+	})
 }
 
 func (err *Errno) Add(message string) {

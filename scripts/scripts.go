@@ -16,7 +16,7 @@ import (
 
 func GenDbComment(modelDirPath, genPackageName, genFileName string) error {
 	projectPath := files.GetParentPath(modelDirPath)
-	filePath := projectPath + genFileName
+	filePath := projectPath + genPackageName + "/" + genFileName
 	shellPath := files.GetAbPathByCaller() + "scripts/comment.sh"
 	shellPath = strings.ReplaceAll(shellPath, "!", "\\!")
 	op := fmt.Sprintf("bash %s %s %s %s", shellPath, modelDirPath, genPackageName, filePath)
