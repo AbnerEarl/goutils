@@ -12,66 +12,66 @@ import (
 	"path/filepath"
 )
 
-type BaseGins struct {
-	token  string
-	router *gins.Server
+type BaseGinServer struct {
+	Token  string
+	Router *gins.Server
 }
 
-func (b *BaseGins) Get(uri string, param map[string]string) *httptest.ResponseRecorder {
+func (b *BaseGinServer) Get(uri string, param map[string]string) *httptest.ResponseRecorder {
 	if param != nil {
 		uri = uri + MapToStr(param)
 	}
 	// 构造请求
 	req := httptest.NewRequest("GET", uri, nil)
-	req.Header.Set("token", b.token)
+	req.Header.Set("token", b.Token)
 	// 初始化响应
 	res := httptest.NewRecorder()
 	// 调用相应的handler接口
-	b.router.ServeHTTP(res, req)
+	b.Router.ServeHTTP(res, req)
 	return res
 }
 
-func (b *BaseGins) Delete(uri string, param map[string]string) *httptest.ResponseRecorder {
+func (b *BaseGinServer) Delete(uri string, param map[string]string) *httptest.ResponseRecorder {
 	if param != nil {
 		uri = uri + MapToStr(param)
 	}
 	// 构造请求
 	req := httptest.NewRequest("DELETE", uri, nil)
-	req.Header.Set("token", b.token)
+	req.Header.Set("token", b.Token)
 	// 初始化响应
 	res := httptest.NewRecorder()
 	// 调用相应的handler接口
-	b.router.ServeHTTP(res, req)
+	b.Router.ServeHTTP(res, req)
 	return res
 }
 
-func (b *BaseGins) PostForm(uri string, param map[string]string) *httptest.ResponseRecorder {
+func (b *BaseGinServer) PostForm(uri string, param map[string]string) *httptest.ResponseRecorder {
 	if param != nil {
 		uri = uri + MapToStr(param)
 	}
 	req := httptest.NewRequest("POST", uri, nil)
-	req.Header.Set("token", b.token)
+	req.Header.Set("token", b.Token)
 	// 初始化响应
 	res := httptest.NewRecorder()
 	// 调用相应handler接口
-	b.router.ServeHTTP(res, req)
+	b.Router.ServeHTTP(res, req)
 	return res
 }
 
-func (b *BaseGins) PostJson(uri string, param map[string]interface{}) *httptest.ResponseRecorder {
+func (b *BaseGinServer) PostJson(uri string, param map[string]interface{}) *httptest.ResponseRecorder {
 	// 将参数转化为json比特流
 	jsonByte, _ := json.Marshal(param)
 	// 构造请求，json数据以请求body的形式传递
 	req := httptest.NewRequest("POST", uri, bytes.NewReader(jsonByte))
-	req.Header.Set("token", b.token)
+	req.Header.Set("token", b.Token)
 	// 初始化响应
 	res := httptest.NewRecorder()
 	// 调用相应的handler接口
-	b.router.ServeHTTP(res, req)
+	b.Router.ServeHTTP(res, req)
 	return res
 }
 
-func (b *BaseGins) PostFile(uri string, param map[string]interface{}, files map[string]string) *httptest.ResponseRecorder {
+func (b *BaseGinServer) PostFile(uri string, param map[string]interface{}, files map[string]string) *httptest.ResponseRecorder {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	//defer writer.Close()
@@ -101,37 +101,37 @@ func (b *BaseGins) PostFile(uri string, param map[string]interface{}, files map[
 	writer.Close()
 	// 构造请求，json数据以请求body的形式传递
 	req := httptest.NewRequest("POST", uri, body)
-	req.Header.Set("token", b.token)
+	req.Header.Set("token", b.Token)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	// 初始化响应
 	res := httptest.NewRecorder()
 	// 调用相应的handler接口
-	b.router.ServeHTTP(res, req)
+	b.Router.ServeHTTP(res, req)
 	return res
 }
 
-func (b *BaseGins) PutForm(uri string, param map[string]string) *httptest.ResponseRecorder {
+func (b *BaseGinServer) PutForm(uri string, param map[string]string) *httptest.ResponseRecorder {
 	if param != nil {
 		uri = uri + MapToStr(param)
 	}
 	req := httptest.NewRequest("PUT", uri, nil)
-	req.Header.Set("token", b.token)
+	req.Header.Set("token", b.Token)
 	// 初始化响应
 	res := httptest.NewRecorder()
 	// 调用相应handler接口
-	b.router.ServeHTTP(res, req)
+	b.Router.ServeHTTP(res, req)
 	return res
 }
 
-func (b *BaseGins) PutJson(uri string, param map[string]interface{}) *httptest.ResponseRecorder {
+func (b *BaseGinServer) PutJson(uri string, param map[string]interface{}) *httptest.ResponseRecorder {
 	// 将参数转化为json比特流
 	jsonByte, _ := json.Marshal(param)
 	// 构造请求，json数据以请求body的形式传递
 	req := httptest.NewRequest("PUT", uri, bytes.NewReader(jsonByte))
-	req.Header.Set("token", b.token)
+	req.Header.Set("token", b.Token)
 	// 初始化响应
 	res := httptest.NewRecorder()
 	// 调用相应的handler接口
-	b.router.ServeHTTP(res, req)
+	b.Router.ServeHTTP(res, req)
 	return res
 }
