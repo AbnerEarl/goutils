@@ -13,15 +13,18 @@ import (
 	"strings"
 )
 
-func GenSwagDoc(mainDirPath string, apiDirPaths []string) error {
+func GenSwagDoc(mainFile, projectPath string, apiDirPaths []string) error {
 	cmd := "swag init --parseDependency --parseInternal"
-	if len(mainDirPath) > 0 {
-		cmd = fmt.Sprintf("%s --dir %s", cmd, mainDirPath)
+	if len(projectPath) > 0 {
+		cmd = fmt.Sprintf("%s --dir %s", cmd, projectPath)
 	} else {
-		mainDirPath = "."
+		projectPath = "."
+	}
+	if len(mainFile) > 0 {
+		cmd = fmt.Sprintf("%s -g %s", cmd, mainFile)
 	}
 	if len(apiDirPaths) > 0 {
-		cmd = fmt.Sprintf("%s --exclude $(find '%s' -type d -maxdepth 1  -not -name '%s' | grep -vE '%s' | tr '\\n' ',')", cmd, mainDirPath, mainDirPath, strings.Join(apiDirPaths, "|"))
+		cmd = fmt.Sprintf("%s --exclude $(find '%s' -type d -maxdepth 1  -not -name '%s' | grep -vE '%s' | tr '\\n' ',')", cmd, projectPath, projectPath, strings.Join(apiDirPaths, "|"))
 	}
 	return cmdc.Bash(cmd)
 }
