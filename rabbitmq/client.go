@@ -172,7 +172,7 @@ func (r *Rabbitmq) ClearQueue(name string) error {
 	return nil
 }
 
-// 创建RabbitMQ结构体实例
+// NewByStruct 创建RabbitMQ结构体实例
 func NewByStruct(queuename, exchange, key, mqUrl string) (*Rabbitmq, error) {
 	rabbitmq := &Rabbitmq{QueueName: queuename, Exchange: exchange, Key: key, MqUrl: mqUrl}
 	var err error
@@ -186,13 +186,13 @@ func NewByStruct(queuename, exchange, key, mqUrl string) (*Rabbitmq, error) {
 	return rabbitmq, nil
 }
 
-// 断开channel和connection
-func (r *Rabbitmq) Destory() {
+// Destroy 断开channel和connection
+func (r *Rabbitmq) Destroy() {
 	r.Channel.Close()
 	r.Conn.Close()
 }
 
-// 订阅模式生成
+// PublishPub 订阅模式生成
 func (r *Rabbitmq) PublishPub(message interface{}) error {
 	bys, err := json.Marshal(message)
 	if err != nil {
@@ -233,8 +233,8 @@ func (r *Rabbitmq) PublishPub(message interface{}) error {
 	return err
 }
 
-// 订阅模式消费端代码
-func (r *Rabbitmq) RecieveSub(fn func(msg []byte)) error {
+// RecieveSub 订阅模式消费端代码
+func (r *Rabbitmq) ReceiveSub(fn func(msg []byte) error) error {
 	//尝试创建交换机，不存在创建
 	err := r.Channel.ExchangeDeclare(
 		//交换机名称
@@ -290,7 +290,10 @@ func (r *Rabbitmq) RecieveSub(fn func(msg []byte)) error {
 	forever := make(chan bool)
 	go func() {
 		for d := range msgs {
-			fn(d.Body)
+			res := fn(d.Body)
+			if res == nil {
+				d.Ack(false)
+			}
 		}
 	}()
 
@@ -298,7 +301,7 @@ func (r *Rabbitmq) RecieveSub(fn func(msg []byte)) error {
 	return nil
 }
 
-// 话题模式发送信息
+// PublishTopic 话题模式发送信息
 func (r *Rabbitmq) PublishTopic(message interface{}) error {
 	bys, err := json.Marshal(message)
 	if err != nil {
@@ -339,11 +342,11 @@ func (r *Rabbitmq) PublishTopic(message interface{}) error {
 	return err
 }
 
-// 话题模式接收信息
-// 要注意key
-// 其中* 用于匹配一个单词，#用于匹配多个单词（可以是零个）
-// 匹配 表示匹配imooc.* 表示匹配imooc.hello,但是imooc.hello.one需要用imooc.#才能匹配到
-func (r *Rabbitmq) RecieveTopic(fn func(msg []byte)) error {
+/* ReceiveTopic 话题模式接收信息
+ * 要注意key, 其中* 用于匹配一个单词，#用于匹配多个单词（可以是零个）
+ * 匹配 表示匹配imooc.* 表示匹配imooc.hello,但是imooc.hello.one需要用imooc.#才能匹配到
+ */
+func (r *Rabbitmq) ReceiveTopic(fn func(msg []byte) error) error {
 	//尝试创建交换机，不存在创建
 	err := r.Channel.ExchangeDeclare(
 		//交换机名称
@@ -400,14 +403,18 @@ func (r *Rabbitmq) RecieveTopic(fn func(msg []byte)) error {
 	forever := make(chan bool)
 	go func() {
 		for d := range msgs {
-			fn(d.Body)
+			res := fn(d.Body)
+			if res == nil {
+				d.Ack(false)
+			}
 		}
 	}()
+
 	<-forever
 	return nil
 }
 
-// 路由模式发送信息
+// PublishRouting 路由模式发送信息
 func (r *Rabbitmq) PublishRouting(message interface{}) error {
 	bys, err := json.Marshal(message)
 	if err != nil {
@@ -448,8 +455,8 @@ func (r *Rabbitmq) PublishRouting(message interface{}) error {
 	return err
 }
 
-// 路由模式接收信息
-func (r *Rabbitmq) RecieveRouting(fn func(msg []byte)) error {
+// ReceiveRouting 路由模式接收信息
+func (r *Rabbitmq) ReceiveRouting(fn func(msg []byte) error) error {
 	//尝试创建交换机，不存在创建
 	err := r.Channel.ExchangeDeclare(
 		//交换机名称
@@ -510,7 +517,10 @@ func (r *Rabbitmq) RecieveRouting(fn func(msg []byte)) error {
 	forever := make(chan bool)
 	go func() {
 		for d := range msgs {
-			fn(d.Body)
+			res := fn(d.Body)
+			if res == nil {
+				d.Ack(false)
+			}
 		}
 	}()
 
@@ -518,7 +528,7 @@ func (r *Rabbitmq) RecieveRouting(fn func(msg []byte)) error {
 	return nil
 }
 
-// 简单模式Step:2、简单模式下生产代码
+// PublishSimple 简单模式发送消息
 func (r *Rabbitmq) PublishSimple(message interface{}) error {
 	bys, err := json.Marshal(message)
 	if err != nil {
@@ -564,7 +574,7 @@ func (r *Rabbitmq) PublishSimple(message interface{}) error {
 	return err
 }
 
-func (r *Rabbitmq) ConsumeSimple(fn func(msg []byte)) error {
+func (r *Rabbitmq) ConsumeSimple(fn func(msg []byte) error) error {
 	//1、申请队列，如果队列存在就跳过，不存在创建
 	//优点：保证队列存在，消息能发送到队列中
 	_, err := r.Channel.QueueDeclare(
@@ -607,7 +617,10 @@ func (r *Rabbitmq) ConsumeSimple(fn func(msg []byte)) error {
 	//启用协程处理
 	go func() {
 		for d := range msgs {
-			fn(d.Body)
+			res := fn(d.Body)
+			if res == nil {
+				d.Ack(false)
+			}
 		}
 	}()
 
@@ -615,7 +628,7 @@ func (r *Rabbitmq) ConsumeSimple(fn func(msg []byte)) error {
 	return nil
 }
 
-func (r *Rabbitmq) ConsumeWorker(consumerName string, fn func(msg []byte)) error {
+func (r *Rabbitmq) ConsumeWorker(consumerName string, fn func(msg []byte) error) error {
 	//1、申请队列，如果队列存在就跳过，不存在创建
 	//优点：保证队列存在，消息能发送到队列中
 	_, err := r.Channel.QueueDeclare(
@@ -658,7 +671,10 @@ func (r *Rabbitmq) ConsumeWorker(consumerName string, fn func(msg []byte)) error
 	//启用协程处理
 	go func() {
 		for d := range msgs {
-			fn(d.Body)
+			res := fn(d.Body)
+			if res == nil {
+				d.Ack(false)
+			}
 		}
 	}()
 
@@ -681,8 +697,8 @@ func (r *Rabbitmq) getExchange(exchange string) error {
 	return err
 }
 
-// 发送消息
-func (r *Rabbitmq) SendMessageByKey(key string, msg interface{}) error {
+// PublishessageByKey 发送消息
+func (r *Rabbitmq) PublishessageByKey(key string, msg interface{}) error {
 	bys, err := json.Marshal(msg)
 	if err != nil {
 		return err
@@ -700,8 +716,8 @@ func (r *Rabbitmq) SendMessageByKey(key string, msg interface{}) error {
 	return err
 }
 
-// 获取到消息
-func (r *Rabbitmq) GetMessage(key string, fn func(msg []byte)) error {
+// ConsumeMessage 获取到消息
+func (r *Rabbitmq) ConsumeMessage(key string, fn func(msg []byte) error) error {
 	// 存储临时交换队列
 	q, err := r.Channel.QueueDeclare(
 		r.QueueName, // name
@@ -748,22 +764,21 @@ func (r *Rabbitmq) GetMessage(key string, fn func(msg []byte)) error {
 		return err
 	}
 
-	ret := make(chan string)
+	forever := make(chan string)
 	go func() {
-		for {
-			select {
-			case d := <-msgs:
-				fn(d.Body)
-				d.Ack(false) // 标记消息被消费掉了
+		for d := range msgs {
+			res := fn(d.Body)
+			if res == nil {
+				d.Ack(false)
 			}
 		}
 	}()
 
-	<-ret
+	<-forever
 	return nil
 }
 
-// NewRabbitMQ 新建 rabbitmq 实例
+// NewByExchange 新建 rabbitmq 实例
 func NewByExchange(username, password, ip string, port int64, vhost, exchange, route, queue string) (*Rabbitmq, error) {
 
 	// 建立amqp链接
@@ -792,8 +807,8 @@ func NewByExchange(username, password, ip string, port int64, vhost, exchange, r
 	return r, err
 }
 
-// SendMessage 发送普通消息
-func (r *Rabbitmq) SendMessage(message interface{}) error {
+// PublishMessage 发送普通消息
+func (r *Rabbitmq) PublishMessage(message interface{}) error {
 	bys, err := json.Marshal(message)
 	if err != nil {
 		return err
@@ -811,8 +826,8 @@ func (r *Rabbitmq) SendMessage(message interface{}) error {
 	return err
 }
 
-// SendDelayMessage 发送延迟消息
-func (r *Rabbitmq) SendDelayMessage(message interface{}, delayTime int) error {
+// PublishDelayMessage 发送延迟消息
+func (r *Rabbitmq) PublishDelayMessage(message interface{}, delayTime int) error {
 	delayQueueName := r.QueueName + "_delay:" + strconv.Itoa(delayTime)
 	delayRouteKey := r.RouteKey + "_delay:" + strconv.Itoa(delayTime)
 
@@ -855,7 +870,7 @@ func (r *Rabbitmq) SendDelayMessage(message interface{}, delayTime int) error {
 }
 
 // Consume 获取消费消息
-func (r *Rabbitmq) Consume(fn func(msg []byte)) error {
+func (r *Rabbitmq) Consume(fn func(msg []byte) error) error {
 	// 声明队列
 	q, err := r.declareQueue(r.QueueName, nil)
 	if err != nil {
@@ -884,12 +899,14 @@ func (r *Rabbitmq) Consume(fn func(msg []byte)) error {
 	if err != nil {
 		return err
 	}
-	forever := make(chan bool) //注册在主进程，不需要阻塞
+	forever := make(chan bool)
 
 	go func() {
 		for d := range msgs {
-			fn(d.Body)
-			d.Ack(false)
+			res := fn(d.Body)
+			if res == nil {
+				d.Ack(false)
+			}
 		}
 	}()
 

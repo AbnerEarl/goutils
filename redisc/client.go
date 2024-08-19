@@ -100,6 +100,27 @@ func (rsc *RedisCli) RdbExists(keys ...string) (int64, error) {
 	return result, err
 }
 
+func (rsc *RedisCli) RdbIncr(key string) (int64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
+	defer cancel()
+	result, err := rsc.Incr(ctx, key).Result()
+	return result, err
+}
+
+func (rsc *RedisCli) RdbIncrBy(key string, value int64) (int64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
+	defer cancel()
+	result, err := rsc.IncrBy(ctx, key, value).Result()
+	return result, err
+}
+
+func (rsc *RedisCli) RdbIncrByFloat(key string, value float64) (float64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
+	defer cancel()
+	result, err := rsc.IncrByFloat(ctx, key, value).Result()
+	return result, err
+}
+
 func (rsc *RedisCli) RdbSet(key string, value interface{}, expireTimeSecond uint64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), CtxExpireTime)
 	defer cancel()
