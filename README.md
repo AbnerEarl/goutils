@@ -276,12 +276,12 @@ type ShopModel struct {
 	Status        uint    `json:"status" gorm:"column:status;default:1;not null;comment:'店铺状态'"`
 }
 
-// For the sake of data security and efficiency, an irregular monotonically increasing integer is used as the primary key ID,
-// which is mainly improved based on the Snow Flower algorithm, Pear Blossom algorithm, and Mist algorithm.
 func (m *ShopModel) TableName() string {
 	return "shop_info"
 }
 
+// For the sake of data security and efficiency, an irregular monotonically increasing integer is used as the primary key ID,
+// which is mainly improved based on the Snow Flower algorithm, Pear Blossom algorithm, and Mist algorithm.
 func (m *ShopModel) BeforeCreate() error {
 	m.Id = web.GenAutoIdByKeyClu(config.RedisCli, web.AUTO_ID_GENERATOR_COUNTER_KEY+m.TableName())
 	return nil
