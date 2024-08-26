@@ -35,8 +35,8 @@ for i in $(seq ${#files[@]}); do
   modelNames=($(cat model/${files[i - 1]} | grep -e "comment:" -e "BaseModel$" | grep -e "comment:" B2 | grep " struct " | awk '{print $2}' ))
   k=0
   tableName=$(cat model/${files[i - 1]} | grep -e "${modelNames[$k]}.*TableName" -A2 | grep "return " | awk '{print $NF}')
-  echo "	${tableName}: map[string]interface{}{" >>$fileName
   tableName=$(echo ${tableName} | awk '{print $1}')
+  echo "	${tableName}: map[string]interface{}{" >>$fileName
   for j in $(seq ${#names[@]}); do
     if [ $j -gt 0 ] && [ ${names[j - 1]} == "###" ] && [ ${names[j]} == "###" ]; then
         continue
