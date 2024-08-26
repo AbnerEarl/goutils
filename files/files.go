@@ -19,13 +19,19 @@ import (
 	"strings"
 )
 
-func GetAbPathByCaller() string {
+func GetAbPath() string {
 	var abPath string
 	_, filename, _, ok := runtime.Caller(0)
 	if ok {
 		abPath = path.Dir(path.Dir(filename)) + "/"
 	}
 	return abPath
+}
+
+func GetCuPath() string {
+	cu, _ := os.Getwd()
+	abp, _ := filepath.Abs(cu)
+	return abp
 }
 
 func GetParentPath(srcPath string) string {

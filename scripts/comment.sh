@@ -36,6 +36,7 @@ for i in $(seq ${#files[@]}); do
   k=0
   tableName=$(cat model/${files[i - 1]} | grep -e "${modelNames[$k]}.*TableName" -A2 | grep "return " | awk '{print $NF}')
   echo "	${tableName}: map[string]interface{}{" >>$fileName
+  tableName=$(echo ${tableName} | awk '{print $1}')
   for j in $(seq ${#names[@]}); do
     if [ $j -gt 0 ] && [ ${names[j - 1]} == "###" ] && [ ${names[j]} == "###" ]; then
         continue
@@ -45,6 +46,9 @@ for i in $(seq ${#files[@]}); do
       let k++
       tableName=$(cat model/${files[i - 1]} | grep -e "${modelNames[$k]}.*TableName" -A2 | grep "return " | awk '{print $NF}')
       echo "	${tableName}: map[string]interface{}{" >>$fileName
+      continue
+    fi
+    if [[ ${names[j - 1]} == "###" ]];then
       continue
     fi
     echo "		\"${names[j - 1]}\": \"${comments[j - 1]}\"," >>$fileName

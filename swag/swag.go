@@ -26,9 +26,14 @@ func GenSwagDoc(mainFile, projectPath string, apiDirPaths []string) error {
 	if len(apiDirPaths) > 0 {
 		cmd = fmt.Sprintf("%s --exclude $(find '%s' -type d -maxdepth 1  -not -name '%s' | grep -vE '%s' | tr '\\n' ',')", cmd, projectPath, projectPath, strings.Join(apiDirPaths, "|"))
 	}
-	return cmdc.Bash(cmd)
+	fmt.Println(cmd)
+	info, err := cmdc.BashString(cmd)
+	fmt.Println(info)
+	return err
 }
 
 func InstallSwag() error {
-	return cmdc.Bash("go install github.com/swaggo/swag/cmd/swag@v1.8.3")
+	info, err := cmdc.BashString("go install github.com/swaggo/swag/cmd/swag@v1.8.3")
+	fmt.Println(info)
+	return err
 }

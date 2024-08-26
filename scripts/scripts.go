@@ -17,15 +17,19 @@ import (
 func GenDbComment(modelDirPath, genPackageName, genFileName string) error {
 	projectPath := files.GetParentPath(modelDirPath)
 	filePath := projectPath + genPackageName + "/" + genFileName
-	shellPath := files.GetAbPathByCaller() + "scripts/comment.sh"
+	shellPath := files.GetAbPath() + "scripts/comment.sh"
 	shellPath = strings.ReplaceAll(shellPath, "!", "\\!")
 	op := fmt.Sprintf("bash %s %s %s %s", shellPath, modelDirPath, genPackageName, filePath)
-	return cmdc.Bash(op)
+	info, err := cmdc.BashString(op)
+	fmt.Println(info)
+	return err
 }
 
 func RunTestReport(moduleName string) error {
-	shellPath := files.GetAbPathByCaller() + "scripts/test.sh"
+	shellPath := files.GetAbPath() + "scripts/test.sh"
 	shellPath = strings.ReplaceAll(shellPath, "!", "\\!")
 	op := fmt.Sprintf("bash %s %s", shellPath, moduleName)
-	return cmdc.Bash(op)
+	info, err := cmdc.BashString(op)
+	fmt.Println(info)
+	return err
 }

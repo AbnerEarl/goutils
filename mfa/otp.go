@@ -180,7 +180,7 @@ func hmacSha1(key string, t int64) ([]byte, error) {
 }
 
 func ClientResourcePackage() map[string]map[string]string {
-	dirPath := files.GetAbPathByCaller() + "mfa/resource/"
+	dirPath := files.GetAbPath() + "mfa/resource/"
 	return map[string]map[string]string{
 		"google_authenticator": {
 			"ios":     "https://apps.apple.com/tw/app/google-authenticator/id388497605",
