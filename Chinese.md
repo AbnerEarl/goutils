@@ -236,7 +236,7 @@ func (m *ShopModel) BeforeCreate() error {
 
 不需要定义其他的方法，因为这个model已经继承了CRUD相关的大部分方法。
 
-自动生成相关的文档，包括：词典、API文档等等，你可以这么使用，在根目录或者main文件目录，创建一个 gen.go 文件，输入以下内容：
+自动生成相关的文档，包括：词典、API文档等等，你可以这么使用，在项目根目录或者main文件目录，创建一个 gen.go 文件，输入以下内容：
 
 ```
 /**
@@ -274,6 +274,109 @@ func main() {
 }
 
 ```
+
+项目入口 main 文件内容示例如下：
+
+```
+package main
+
+import (
+	"freedom/config"
+	_ "freedom/docs"
+	"freedom/model"
+	"freedom/router"
+	"freedom/task"
+	"github.com/AbnerEarl/goutils/gins"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.uber.org/zap"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+)
+
+var (
+	cfgShop = pflag.StringP("config", "c", "etc/config_shop.yaml", "project config")
+)
+
+// @title 项目API文档
+// @version 1.0
+// @description 项目前后端联调及测试API文档。
+// @termsOfService https://github.com
+// @contact.name API Support
+// @contact.url http://www.cnblogs.com
+// @contact.email ×××@qq.com
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name token
+// @BasePath /api/v1
+func main() {
+	pflag.Parse()
+
+	if err := config.Init(*cfgShop); err != nil {
+		panic(err)
+	}
+	mode := viper.GetString("web.runmode")
+	addr := viper.GetString("web.addr")
+	logCycle := viper.GetInt("log.cycle")
+	addrs := viper.GetStringSlice("rs.addrs")
+	password := viper.GetString("rs.password")
+
+	exitChan := make(chan int)
+	signalChan := make(chan os.Signal, 1)
+	go func() {
+		<-signalChan
+		exitChan <- 1
+	}()
+
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGKILL)
+
+	model.InitDb()
+	config.InitRedis(addrs, password)
+
+	go task.PeriodicTasks(logCycle)
+
+	g := gins.DefaultServer(mode)
+	g.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.LoadShop(g)
+	go func() {
+		zap.L().Info(http.ListenAndServe(addr, g).Error())
+	}()
+
+	<-exitChan
+
+}
+
+```
+
+文件目录结构示例如下：
+
+```
+├── README.en.md
+├── README.md
+├── api
+├── base
+├── conf
+├── config
+├── docs
+├── etc
+├── gen.go
+├── go.mod
+├── go.sum
+├── lib
+├── main.go
+├── model
+├── router
+├── scripts
+├── service
+├── shop.go
+└── task
+
+```
+
 
 最后执行gen.go文件，即可生成相关的词典文档和API接口文档，示例如下：
 
