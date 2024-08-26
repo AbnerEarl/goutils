@@ -200,7 +200,7 @@ func (db *DB) Transaction(fc func(tx *TX) error) error {
 package model
 
 import (
-	"freedom/config"
+	"projectname/config"
 	"github.com/AbnerEarl/goutils/dbs"
 	"github.com/AbnerEarl/goutils/web"
 )
@@ -281,11 +281,11 @@ func main() {
 package main
 
 import (
-	"freedom/config"
-	_ "freedom/docs"
-	"freedom/model"
-	"freedom/router"
-	"freedom/task"
+	"projectname/config"
+	_ "projectname/docs"
+	"projectname/model"
+	"projectname/router"
+	"projectname/task"
 	"github.com/AbnerEarl/goutils/gins"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
