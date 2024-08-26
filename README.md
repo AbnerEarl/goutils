@@ -255,7 +255,7 @@ In order to better use automatic association methods, it is necessary to pay att
 package model
 
 import (
-	"freedom/config"
+	"projectname/config"
 	"github.com/AbnerEarl/goutils/dbs"
 	"github.com/AbnerEarl/goutils/web"
 )
@@ -337,11 +337,11 @@ The content example of the main file for the project entrance is as follows:
 package main
 
 import (
-	"freedom/config"
-	_ "freedom/docs"
-	"freedom/model"
-	"freedom/router"
-	"freedom/task"
+	"projectname/config"
+	_ "projectname/docs"
+	"projectname/model"
+	"projectname/router"
+	"projectname/task"
 	"github.com/AbnerEarl/goutils/gins"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
