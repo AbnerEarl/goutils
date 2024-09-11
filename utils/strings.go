@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -70,22 +69,6 @@ func CheckPasswordRule(password string) bool {
 	return true
 }
 
-func SubnetMatch(subnet string) (string, string, error) {
-	ip, ipv4Net, err := net.ParseCIDR(subnet)
-	if err != nil {
-		return "", "", err
-	}
-	return ipv4Net.String(), ip.String(), err
-}
-
-func CheckIP(ip string) string {
-	result := net.ParseIP(ip)
-	if result != nil {
-		return result.String()
-	}
-	return ""
-}
-
 func Byte2Any(b []byte, t reflect.Type) interface{} {
 	data := Byte2Str(b)
 	switch t.Kind() {
@@ -113,6 +96,11 @@ func Byte2Any(b []byte, t reflect.Type) interface{} {
 	default:
 		return data
 	}
+}
+
+func Str2Array(s string) []string {
+	s = s[strings.LastIndex(s, "[")+1 : strings.Index(s, "]")]
+	return strings.Split(s, " ")
 }
 
 func Byte2Str(b []byte) string {

@@ -33,46 +33,6 @@ func (m *BaseModel) TableName() string {
 	return "base_info"
 }
 
-func (m *BaseModel) BeforeCreate(fc func(tx *TX) error, db *DB) error {
-	f := HandleFunc(fc)
-	return db.DB.Transaction(f)
-}
-
-func (m *BaseModel) AfterCreate(fc func(tx *TX) error, db *DB) error {
-	f := HandleFunc(fc)
-	return db.DB.Transaction(f)
-}
-
-func (m *BaseModel) BeforeSave(fc func(tx *TX) error, db *DB) error {
-	f := HandleFunc(fc)
-	return db.DB.Transaction(f)
-}
-
-func (m *BaseModel) AfterSave(fc func(tx *TX) error, db *DB) error {
-	f := HandleFunc(fc)
-	return db.DB.Transaction(f)
-}
-
-func (m *BaseModel) BeforeUpdate(fc func(tx *TX) error, db *DB) error {
-	f := HandleFunc(fc)
-	return db.DB.Transaction(f)
-}
-
-func (m *BaseModel) AfterUpdate(fc func(tx *TX) error, db *DB) error {
-	f := HandleFunc(fc)
-	return db.DB.Transaction(f)
-}
-
-func (m *BaseModel) BeforeDelete(fc func(tx *TX) error, db *DB) error {
-	f := HandleFunc(fc)
-	return db.DB.Transaction(f)
-}
-
-func (m *BaseModel) AfterDelete(fc func(tx *TX) error, db *DB) error {
-	f := HandleFunc(fc)
-	return db.DB.Transaction(f)
-}
-
 func (db *DB) Create(dataModel interface{}) error {
 	//tableName := ""
 	//ref := reflect.ValueOf(dataModel)
