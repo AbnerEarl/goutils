@@ -255,7 +255,7 @@ In order to better use automatic association methods, it is necessary to pay att
 package model
 
 import (
-	"freedom/config"
+	"projectname/config"
 	"github.com/AbnerEarl/goutils/dbs"
 	"github.com/AbnerEarl/goutils/web"
 )
@@ -292,7 +292,7 @@ func (m *ShopModel) BeforeCreate() error {
 
 There is no need to define other methods, as this model already inherits most of the CRUD related methods.
 
-Automatically generate relevant documents, including dictionaries, API documents, etc. You can use them by creating a gen.go file in the root directory or main file directory, and entering the following content:
+Automatically generate relevant documents, including dictionaries, API documents, etc. You can use them by creating a gen.go file in the project root directory or main file directory, and entering the following content:
 
 ```
 /**
@@ -328,6 +328,108 @@ func main() {
 	}
 
 }
+
+```
+
+The content example of the main file for the project entrance is as follows:
+
+```
+package main
+
+import (
+	"projectname/config"
+	_ "projectname/docs"
+	"projectname/model"
+	"projectname/router"
+	"projectname/task"
+	"github.com/AbnerEarl/goutils/gins"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.uber.org/zap"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+)
+
+var (
+	cfgShop = pflag.StringP("config", "c", "etc/config_shop.yaml", "project config")
+)
+
+// @title 项目API文档
+// @version 1.0
+// @description 项目前后端联调及测试API文档。
+// @termsOfService https://github.com
+// @contact.name API Support
+// @contact.url http://www.cnblogs.com
+// @contact.email ×××@qq.com
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name token
+// @BasePath /api/v1
+func main() {
+	pflag.Parse()
+
+	if err := config.Init(*cfgShop); err != nil {
+		panic(err)
+	}
+	mode := viper.GetString("web.runmode")
+	addr := viper.GetString("web.addr")
+	logCycle := viper.GetInt("log.cycle")
+	addrs := viper.GetStringSlice("rs.addrs")
+	password := viper.GetString("rs.password")
+
+	exitChan := make(chan int)
+	signalChan := make(chan os.Signal, 1)
+	go func() {
+		<-signalChan
+		exitChan <- 1
+	}()
+
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGKILL)
+
+	model.InitDb()
+	config.InitRedis(addrs, password)
+
+	go task.PeriodicTasks(logCycle)
+
+	g := gins.DefaultServer(mode)
+	g.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.LoadShop(g)
+	go func() {
+		zap.L().Info(http.ListenAndServe(addr, g).Error())
+	}()
+
+	<-exitChan
+
+}
+
+```
+
+The example of file directory structure is as follows:
+
+```
+├── README.en.md
+├── README.md
+├── api
+├── base
+├── conf
+├── config
+├── docs
+├── etc
+├── gen.go
+├── go.mod
+├── go.sum
+├── lib
+├── main.go
+├── model
+├── router
+├── scripts
+├── service
+├── shop.go
+└── task
 
 ```
 
