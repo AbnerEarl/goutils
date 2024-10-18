@@ -258,6 +258,7 @@ import (
 	"projectname/config"
 	"github.com/AbnerEarl/goutils/dbs"
 	"github.com/AbnerEarl/goutils/web"
+	"gorm.io/gorm"
 )
 
 type ShopModel struct {
@@ -282,7 +283,7 @@ func (m *ShopModel) TableName() string {
 
 // For the sake of data security and efficiency, an irregular monotonically increasing integer is used as the primary key ID,
 // which is mainly improved based on the Snow Flower algorithm, Pear Blossom algorithm, and Mist algorithm.
-func (m *ShopModel) BeforeCreate() error {
+func (m *ShopModel) BeforeCreate(db *gorm.DB) error {
 	m.Id = web.GenAutoIdByKeyClu(config.RedisCli, web.AUTO_ID_GENERATOR_COUNTER_KEY+m.TableName())
 	return nil
 }

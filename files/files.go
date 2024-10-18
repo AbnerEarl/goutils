@@ -20,18 +20,18 @@ import (
 )
 
 func GetAbPath() string {
-	var abPath string
+	var abp string
 	_, filename, _, ok := runtime.Caller(0)
 	if ok {
-		abPath = path.Dir(path.Dir(filename)) + "/"
+		abp = path.Dir(path.Dir(filename))
 	}
-	return abPath
+	return abp + "/"
 }
 
 func GetCuPath() string {
 	cu, _ := os.Getwd()
 	abp, _ := filepath.Abs(cu)
-	return abp
+	return abp + "/"
 }
 
 func GetParentPath(srcPath string) string {

@@ -33,7 +33,8 @@ func GenSwagDoc(mainFile, projectPath string, apiDirPaths []string) error {
 }
 
 func InstallSwag() error {
-	info, err := cmdc.BashString("go install github.com/swaggo/swag/cmd/swag@v1.8.3")
+	//info, err := cmdc.BashString("go install github.com/swaggo/swag/cmd/swag@v1.8.3")
+	info, err := cmdc.BashString("go install github.com/swaggo/swag/cmd/swag@v1.8.12")
 	fmt.Println(info)
 	return err
 }

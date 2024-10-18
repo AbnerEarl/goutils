@@ -203,6 +203,7 @@ import (
 	"projectname/config"
 	"github.com/AbnerEarl/goutils/dbs"
 	"github.com/AbnerEarl/goutils/web"
+	"gorm.io/gorm"
 )
 
 type ShopModel struct {
@@ -226,7 +227,7 @@ func (m *ShopModel) TableName() string {
 }
 
 // 为了数据安全性，同时兼顾效率，使用无规则态势单调递增整数作为主键ID，主要参考雪花算法、梨花算法、薄雾算法改进而来
-func (m *ShopModel) BeforeCreate() error {
+func (m *ShopModel) BeforeCreate(db *gorm.DB) error {
 	m.Id = web.GenAutoIdByKeyClu(config.RedisCli, web.AUTO_ID_GENERATOR_COUNTER_KEY+m.TableName())
 	return nil
 }
