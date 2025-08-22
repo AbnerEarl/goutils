@@ -14,8 +14,11 @@ package domain
 import (
 	"bufio"
 	"fmt"
+	"golang.org/x/net/publicsuffix"
 	"io"
+	"net"
 	"net/http/cookiejar"
+	"net/url"
 	"os"
 	"strings"
 
@@ -574,4 +577,95 @@ func PublicSuffix(domain string) (publicSuffix string, icann bool) {
 // For example, the eTLD+1 for "foo.bar.golang.org" is "golang.org".
 func EffectiveTLDPlusOne(domain string) (string, error) {
 	return Domain(domain)
+}
+
+// GetMainDomain 输入任意子域名、URL或IP地址，返回其主域名或IP地址。
+// 功能特性:
+// 1. 准确提取主域名：自动处理多部分顶级域名，如 "google.co.uk"。
+// 2. 支持IP地址：如果输入是IP地址（v4或v6），则直接返回该IP地址。
+// 3. 支持中文域名：可以正确处理包含中文字符的国际化域名（IDN）。
+// 4. 兼容完整URL：能从复杂的URL中提取出主机部分进行处理
+// 示例:
+// - "deep.learning.google.co.uk" -> "google.co.uk"
+// - "http://192.168.1.1:8080/path" -> "192.168.1.1"
+// - "邮件.宁波舟山港.net" -> "宁波舟山港.net"
+func GetMainDomain(input string) (string, error) {
+	// 1. 清洗和预处理输入
+	// 如果输入不包含协议头，url.Parse可能会将其解析为路径部分，
+	// 因此我们为其添加一个临时的协议头。
+	if !strings.Contains(input, "://") && !strings.HasPrefix(input, "//") {
+		input = "http://" + input
+	}
+
+	parsedURL, err := url.Parse(input)
+	if err != nil {
+		return "", fmt.Errorf("无法解析输入 '%s': %w", input, err)
+	}
+
+	// 提取主机名部分，例如从 "https://www.google.com/search" 提取 "www.google.com"
+	// 对于中文域名，Go的url.Parse会自动进行Punycode编码。
+	// 但我们希望最后返回的是原始的中文域名，所以先用原始主机名。
+	hostname := parsedURL.Hostname()
+	if hostname == "" {
+		return "", fmt.Errorf("无法从输入中提取主机名")
+	}
+
+	// 2. 【新功能】检查主机名是否为IP地址
+	// net.ParseIP可以同时处理IPv4和IPv6。
+	if ip := net.ParseIP(hostname); ip != nil {
+		return hostname, nil // 是IP地址，直接返回
+	}
+
+	// 3. 如果不是IP，则使用 publicsuffix 库获取 eTLD+1
+	// EffectiveTLDPlusOne 会自动处理像 .co.uk, .com.cn 这样的公共后缀。
+	mainDomain, err := publicsuffix.EffectiveTLDPlusOne(hostname)
+	if err != nil {
+		// 对于 localhost 或其他无法识别的域名，这里会报错
+		return "", fmt.Errorf("无法获取 '%s' 的主域名: %w", hostname, err)
+	}
+
+	// 4. 处理中文域名显示问题
+	// 由于url.Parse会将中文转为Punycode，我们需要将结果转换回来。
+	// 如果原始主机名包含我们找到的主域名（Punycode形式），我们假设可以安全地
+	// 从原始主机名中提取出对应的中文主域名。
+	// 这是一个简化的处理，但在大多数情况下有效。
+	// 更严谨的方法是使用 idna 库进行转换，但 publicsuffix 返回的已经是处理过的结果，
+	// 所以我们在这里进行后缀匹配。
+	originalHost := parsedURL.Host // 使用 .Host 保留中文字符
+	if originalHost != hostname {  // 说明存在中文字符被转换了
+		// 为了避免端口号干扰，先移除
+		if portIndex := strings.LastIndex(originalHost, ":"); portIndex != -1 {
+			// 确保不是IPv6的冒号
+			if ip := net.ParseIP(originalHost[:portIndex]); ip == nil || ip.To4() != nil {
+				originalHost = originalHost[:portIndex]
+			}
+		}
+
+		// 查找Punycode主域名在原始域名中的对应部分
+		// 示例: originalHost="邮件.宁波舟山港.net", mainDomain="xn--zfr64x43ey0a322o.net"
+		// 我们需要找到 "宁波舟山港.net"
+
+		// 这是一个更简单可靠的办法：直接对原始主机使用publicsuffix
+		// 但publicsuffix库的List不直接接受unicode，所以前面的Punycode转换是必要的
+		// 所以我们在这里进行一个简单的替换逻辑
+		punycodeTld, _ := publicsuffix.PublicSuffix(hostname)
+		originalTld, _ := publicsuffix.PublicSuffix(originalHost) // 可能会失败，但没关系
+
+		if strings.HasSuffix(originalHost, originalTld) && strings.HasSuffix(mainDomain, punycodeTld) {
+			// 替换后缀，得到主域名的unicode版本
+			originalBaseDomain := strings.TrimSuffix(strings.TrimSuffix(originalHost, "."+originalTld), "."+punycodeTld) // 双重trim以防万一
+
+			// 找到最后一个 "." 的位置
+			lastDotIndex := strings.LastIndex(originalBaseDomain, ".")
+			if lastDotIndex != -1 {
+				originalBaseDomain = originalBaseDomain[lastDotIndex+1:]
+			}
+
+			// 如果punycode解码后的基础域名和原始基础域名匹配（或近似），则返回原始版本
+			// 这是一个启发式方法，因为没有直接的反向映射
+			return originalBaseDomain + "." + originalTld, nil
+		}
+	}
+
+	return mainDomain, nil
 }
