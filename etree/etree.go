@@ -7,7 +7,7 @@ import (
 	"errors"
 	"io"
 	"os"
-	"slices"
+	"sort"
 	"strings"
 )
 
@@ -1449,11 +1449,12 @@ func (e *Element) RemoveAttr(key string) *Attr {
 
 // SortAttrs sorts this element's attributes lexicographically by key.
 func (e *Element) SortAttrs() {
-	slices.SortFunc(e.Attr, func(a, b Attr) int {
-		if v := strings.Compare(a.Space, b.Space); v != 0 {
-			return v
+	sort.Slice(e.Attr, func(i, j int) bool {
+		a, b := e.Attr[i], e.Attr[j]
+		if a.Space != b.Space {
+			return a.Space < b.Space
 		}
-		return strings.Compare(a.Key, b.Key)
+		return a.Key < b.Key
 	})
 }
 
