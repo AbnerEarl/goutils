@@ -1,7 +1,9 @@
 package etree
 
 import (
+	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"unicode/utf8"
 )
@@ -380,8 +382,107 @@ func escapeString(w Writer, s string, m escapeMode) {
 	w.WriteString(s[last:])
 }
 
+func RobustXMLFix(xmlData string) string {
+	// 使用正则表达式或更复杂的方法来识别和修复未转义的 & 字符
+	// 这里使用一个简单但有效的方法
+
+	// 先将所有 & 替换为 &amp;
+	fixed := strings.Replace(xmlData, "&", "&amp;", -1)
+
+	// 然后恢复已知的 XML 实体
+	entities := []string{
+		// 常用符号
+		"&amp;",  // 连接符
+		"&lt;",   // 小于号
+		"&gt;",   // 大于号
+		"&quot;", // 双引号
+		"&apos;", // 单引号
+		"&nbsp;", // 不换行空格
+
+		// 引号相关
+		"&lsaquo;", // 左单角引号
+		"&rsaquo;", // 右单角引号
+		"&laquo;",  // 左双角引号
+		"&raquo;",  // 右双角引号
+		"&ldquo;",  // 左双引号
+		"&rdquo;",  // 右双引号
+		"&lsquo;",  // 左单引号
+		"&rsquo;",  // 右单引号
+
+		// 版权和商标
+		"&copy;",  // 版权符号
+		"&reg;",   // 注册商标
+		"&trade;", // 商标符号
+
+		// 数学符号
+		"&plusmn;", // 正负号
+		"&times;",  // 乘号
+		"&divide;", // 除号
+		"&fnof;",   // 函数符号
+		"&int;",    // 积分符号
+		"&sum;",    // 求和符号
+
+		// 箭头
+		"&larr;", // 左箭头
+		"&uarr;", // 上箭头
+		"&rarr;", // 右箭头
+		"&darr;", // 下箭头
+		"&harr;", // 左右箭头
+
+		// 标点符号
+		"&bull;",   // 项目符号
+		"&hellip;", // 省略号
+		"&prime;",  // 分钟符号
+		"&Prime;",  // 秒符号
+
+		// 货币符号
+		"&cent;",  // 分币符号
+		"&pound;", // 英镑符号
+		"&yen;",   // 日元符号
+		"&euro;",  // 欧元符号
+
+		// 其他
+		"&sect;",  // 章节符号
+		"&para;",  // 段落符号
+		"&deg;",   // 度符号
+		"&micro;", // 微符号
+	}
+
+	for _, entity := range entities {
+		// 将 &amp;+实体 恢复为原始实体
+		damagedEntity := "&amp;" + entity[1:]
+		fixed = strings.ReplaceAll(fixed, damagedEntity, entity)
+	}
+
+	return fixed
+}
+
+// 处理包含 CDATA 的 XML
+func FixXMLWithCDATA(xmlData string) string {
+	// 使用正则表达式识别 CDATA 部分
+	cdataRe := regexp.MustCompile(`<!\[CDATA\[(.*?)\]\]>`)
+
+	// 先提取 CDATA 部分并替换为占位符
+	cdataParts := cdataRe.FindAllString(xmlData, -1)
+	for i, part := range cdataParts {
+		placeholder := fmt.Sprintf("@@CDATA_%d@@", i)
+		xmlData = strings.Replace(xmlData, part, placeholder, 1)
+	}
+
+	// 修复非 CDATA 部分中的 & 字符
+	fixed := RobustXMLFix(xmlData)
+
+	// 恢复 CDATA 部分
+	for i, part := range cdataParts {
+		placeholder := fmt.Sprintf("@@CDATA_%d@@", i)
+		fixed = strings.Replace(fixed, placeholder, part, 1)
+	}
+
+	return fixed
+}
+
 // 修复 XML 中的 HTML 实体
-func fixAllHTMLEntities(xmlData string) string {
+func FixAllHTMLEntities(xmlData string) string {
 	// 先处理 &amp;，将其替换为 &
 	fixed := strings.ReplaceAll(xmlData, "&amp;", "&")
 

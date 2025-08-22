@@ -353,7 +353,7 @@ func (d *Document) ReadFrom(r io.Reader, isFixed bool) (n int64, err error) {
 			return 0, err
 		}
 		if isFixed {
-			s := fixAllHTMLEntities(string(b))
+			s := FixXMLWithCDATA(string(b))
 			b = []byte(s)
 		}
 		if err := validateXML(bytes.NewReader(b), d.ReadSettings); err != nil {
@@ -380,7 +380,7 @@ func (d *Document) ReadFromFile(filepath string, isFixed bool) error {
 // ReadFromBytes reads XML from the byte slice 'b' into the this document.
 func (d *Document) ReadFromBytes(b []byte, isFixed bool) error {
 	if isFixed {
-		s := fixAllHTMLEntities(string(b))
+		s := FixXMLWithCDATA(string(b))
 		b = []byte(s)
 	}
 	if d.ReadSettings.ValidateInput {
@@ -395,7 +395,7 @@ func (d *Document) ReadFromBytes(b []byte, isFixed bool) error {
 // ReadFromString reads XML from the string 's' into this document.
 func (d *Document) ReadFromString(s string, isFixed bool) error {
 	if isFixed {
-		s = fixAllHTMLEntities(s)
+		s = FixXMLWithCDATA(s)
 	}
 	if d.ReadSettings.ValidateInput {
 		if err := validateXML(strings.NewReader(s), d.ReadSettings); err != nil {
