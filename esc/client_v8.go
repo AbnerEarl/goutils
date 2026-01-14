@@ -100,7 +100,6 @@ func (esc *EsClient8) CreateIndex(name string) (*Response8, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -110,7 +109,6 @@ func (esc *EsClient8) CreateIndexBodyMap(name string, body map[string]interface{
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -120,7 +118,6 @@ func (esc *EsClient8) CreateIndexBodyString(name, body string) (*Response8, erro
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -129,7 +126,6 @@ func (esc *EsClient8) RetrieveIndex(name string) (*Response8, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -138,7 +134,6 @@ func (esc *EsClient8) ExistsIndex(name string) (*Response8, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -147,7 +142,6 @@ func (esc *EsClient8) RetrieveIndexBool(name string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer res.Body.Close()
 	if !res.IsError() {
 		return true, nil
 	}
@@ -159,7 +153,6 @@ func (esc *EsClient8) ExistsIndexBool(name string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer res.Body.Close()
 	if !res.IsError() {
 		return true, nil
 	}
@@ -171,7 +164,6 @@ func (esc *EsClient8) DeleteIndex(name string) (*Response8, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -181,7 +173,6 @@ func (esc *EsClient8) CreateDoc(index, body string) (*Response8, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -191,7 +182,6 @@ func (esc *EsClient8) CreateDocMap(index string, body map[string]interface{}) (*
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -201,7 +191,6 @@ func (esc *EsClient8) CreateDocBatchString(index string, docs []string) (*Respon
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -211,7 +200,6 @@ func (esc *EsClient8) CreateDocBatchMap(index string, docs []map[string]interfac
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -220,7 +208,6 @@ func (esc *EsClient8) RetrieveDoc(index, id string) (*Response8, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -229,7 +216,6 @@ func (esc *EsClient8) RetrieveDoc2Map(index, id string) ([]map[string]interface{
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -255,7 +241,6 @@ func (esc *EsClient8) RetrieveDoc2Byte(index, id string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -286,7 +271,6 @@ func (esc *EsClient8) RetrieveDocQuery(index, query string) (*Response8, error) 
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -299,7 +283,6 @@ func (esc *EsClient8) RetrieveDocQuery2Map(index, query string) ([]map[string]in
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -329,7 +312,6 @@ func (esc *EsClient8) RetrieveDocQuery2Byte(index, query string) ([]byte, error)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -360,7 +342,6 @@ func (esc *EsClient8) RetrieveDocCountQuery(index, query string) (*Response8, er
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -373,7 +354,6 @@ func (esc *EsClient8) RetrieveDocCountQueryNum(index, query string) (uint64, err
 	if err != nil {
 		return 0, err
 	}
-	defer res.Body.Close()
 	var countResult map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&countResult); err != nil {
 		return 0, err
@@ -389,7 +369,6 @@ func (esc *EsClient8) RetrieveDocSql(sql string) (*Response8, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -400,7 +379,6 @@ func (esc *EsClient8) RetrieveDocSql2Map(sql string) ([]map[string]interface{}, 
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -428,7 +406,6 @@ func (esc *EsClient8) RetrieveDocSql2Byte(sql string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -464,7 +441,6 @@ func (esc *EsClient8) RetrieveDocMatch(index string, params map[string]interface
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -482,7 +458,6 @@ func (esc *EsClient8) RetrieveDocMatch2Map(index string, params map[string]inter
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -517,7 +492,6 @@ func (esc *EsClient8) RetrieveDocMatch2Byte(index string, params map[string]inte
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -553,7 +527,6 @@ func (esc *EsClient8) RetrieveDocCountMatch(index string, params map[string]inte
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -571,7 +544,6 @@ func (esc *EsClient8) RetrieveDocCountMatchNum(index string, params map[string]i
 	if err != nil {
 		return 0, err
 	}
-	defer res.Body.Close()
 	var countResult map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&countResult); err != nil {
 		return 0, err
@@ -589,7 +561,6 @@ func (esc *EsClient8) RetrieveDocMap(index string, params map[string]interface{}
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -602,7 +573,6 @@ func (esc *EsClient8) RetrieveDocMap2Map(index string, params map[string]interfa
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -632,7 +602,6 @@ func (esc *EsClient8) RetrieveDocMap2Byte(index string, params map[string]interf
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -663,7 +632,6 @@ func (esc *EsClient8) RetrieveDocCountMap(index string, params map[string]interf
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -676,7 +644,6 @@ func (esc *EsClient8) RetrieveDocCountMapNum(index string, params map[string]int
 	if err != nil {
 		return 0, err
 	}
-	defer res.Body.Close()
 	var countResult map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&countResult); err != nil {
 		return 0, err
@@ -699,7 +666,6 @@ func (esc *EsClient8) RetrieveDocCountModel(index string, model interface{}, tag
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -717,7 +683,6 @@ func (esc *EsClient8) RetrieveDocCountModelNum(index string, model interface{}, 
 	if err != nil {
 		return 0, err
 	}
-	defer res.Body.Close()
 	var countResult map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&countResult); err != nil {
 		return 0, err
@@ -740,7 +705,6 @@ func (esc *EsClient8) RetrieveDocModel(index string, model interface{}, tagName 
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -758,7 +722,6 @@ func (esc *EsClient8) RetrieveDocModel2Map(index string, model interface{}, tagN
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -793,7 +756,6 @@ func (esc *EsClient8) RetrieveDocModel2Byte(index string, model interface{}, tag
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -849,7 +811,6 @@ func (esc *EsClient8) RetrieveDocMapList(pageSize, pageNo int, params map[string
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -887,7 +848,6 @@ func (esc *EsClient8) RetrieveDocMapList2Map(pageSize, pageNo int, params map[st
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -942,7 +902,6 @@ func (esc *EsClient8) RetrieveDocMapList2Byte(pageSize, pageNo int, params map[s
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -998,7 +957,6 @@ func (esc *EsClient8) RetrieveDocModelList(pageSize, pageNo int, model interface
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -1036,7 +994,6 @@ func (esc *EsClient8) RetrieveDocModelList2Map(pageSize, pageNo int, model inter
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -1091,7 +1048,6 @@ func (esc *EsClient8) RetrieveDocModelList2Byte(pageSize, pageNo int, model inte
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	var searchHits map[string]interface{}
 	if err = json.NewDecoder(res.Body).Decode(&searchHits); err != nil {
 		return nil, err
@@ -1119,7 +1075,6 @@ func (esc *EsClient8) UpdateDoc(index, id string, body interface{}) (*Response8,
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -1129,7 +1084,6 @@ func (esc *EsClient8) UpdateDocMap(index, id string, params map[string]interface
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -1139,7 +1093,6 @@ func (esc *EsClient8) UpdateDocModel(index, id string, model interface{}, tagNam
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -1153,7 +1106,6 @@ func (esc *EsClient8) UpdateDocQuery(index, query, script string) (*Response8, e
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -1177,7 +1129,6 @@ func (esc *EsClient8) UpdateDocQueryMap(index string, query, params map[string]i
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -1203,7 +1154,6 @@ func (esc *EsClient8) UpdateDocQueryModel(index string, whereModel, updateModel 
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -1212,7 +1162,6 @@ func (esc *EsClient8) DeleteDoc(index, id string) (*Response8, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -1230,7 +1179,6 @@ func (esc *EsClient8) DeleteDocMap(index string, params map[string]interface{}) 
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
 
@@ -1248,6 +1196,5 @@ func (esc *EsClient8) DeleteDocModel(index string, model interface{}, tagName st
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 	return &Response8{res}, nil
 }
